@@ -1,0 +1,10 @@
+# requirements.txt
+numpy
+scipy
+pandas
+matplotlib
+seaborn
+scikit-learn
+maturin
+nltk
+underthesea
