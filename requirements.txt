@@ -6,5 +6,6 @@ matplotlib
 seaborn
 scikit-learn
 maturin
-nltk
 underthesea
+nltk
+streamlit
