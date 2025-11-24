@@ -3,7 +3,6 @@ import pandas as pd
 from dateutil.parser import parse
 from datetime import datetime
 
-
 def group_columns_by_type(df: pd.DataFrame, display_info: bool = False):
     """
     Groups DataFrame columns by data type into numerical, categorical, and datetime categories.

@@ -7,5 +7,6 @@ seaborn
 scikit-learn
 maturin
 underthesea
+pyvi
 nltk
 streamlit
