@@ -1,4 +1,6 @@
 # requirements.txt
+joblib
+pyyaml
 numpy
 scipy
 pandas
