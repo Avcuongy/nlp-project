@@ -11,6 +11,8 @@ paths:
   processed: data/processed
   external: data/external
   models: models
+  models_ml: models/ml # Save artifacts of ML models
+  models_dl: models/dl # Save artifacts of DL models
   logs: logs
 
 # Data settings
@@ -41,7 +43,9 @@ ml_configs:
 logging:
   tensorboard_dir: logs/tensorboard
   training_log: logs/training.log
-  hpo_dir: logs/hpo
+  hpo_dir: logs/hpo # (Optionally) Directory for HPO results
+  hpo_ml_dir: logs/hpo/ml # (Optionally) Separate HPO results for ML
+  hpo_dl_dir: logs/hpo/dl # (Optionally) Separate HPO results for DL
 
 # Runtime settings
 runtime:
