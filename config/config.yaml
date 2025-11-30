@@ -1,0 +1,50 @@
+# Configuration file for NLP project
+project:
+  name: nlp-project
+  description: A project for Sentiment Analysis using various ML and DL models
+  seed: 42
+
+# File
+paths:
+  data_root: data
+  raw: data/raw
+  processed: data/processed
+  external: data/external
+  models: models
+  logs: logs
+
+# Data settings
+dataset:
+  train_file: data/processed/train.csv
+  val_file: data/processed/val.csv
+  test_file: data/processed/test.csv
+  text_column: text
+  label_column: label
+  label_map:
+    negative: 0
+    neutral: 1
+    positive: 2
+
+# Experiment selector
+experiment:
+  model_family: svm # Select model: svm | a | b | UNGTHU
+  search_method: grid # grid | random
+
+# Model-specific configs
+ml_configs:
+  svm: config/ml/svm.yaml
+  a: config/ml/a.yaml
+  b: config/ml/b.yaml
+  UNGTHU: config/dl/UNGTHU.yaml
+
+# Save logs and checkpoints
+logging:
+  tensorboard_dir: logs/tensorboard
+  training_log: logs/training.log
+  hpo_dir: logs/hpo
+
+# Runtime settings
+runtime:
+  use_gpu: false
+  batch_size: 32
+  num_workers: 4
