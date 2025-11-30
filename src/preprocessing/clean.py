@@ -1,41 +1,42 @@
 import re
 import unicodedata
 
+
 def vn_text_clean(text: str) -> str:
     """
-    Làm sạch và chuẩn hóa văn bản tiếng Việt.
-    
-    **Quy trình xử lý bao gồm**:
-        1. Chuẩn hóa Unicode về dạng NFC.
-        2. Chuyển đổi toàn bộ văn bản sang chữ thường.
-        3. Loại bỏ các đường dẫn (URL) và địa chỉ email.
-        4. Loại bỏ dấu câu và các ký tự đặc biệt (chỉ giữ lại chữ cái, số và khoảng trắng).
-        5. Loại bỏ các chữ số.
-        6. Loại bỏ khoảng trắng thừa ở đầu, cuối và giữa các từ.
+    Clean and normalize Vietnamese text.
+
+    The processing steps include:
+        1. Normalize Unicode to the NFC form.
+        2. Convert the entire text to lowercase.
+        3. Remove URLs and email addresses.
+        4. Remove punctuation and special characters (only keeping letters, numbers, and spaces).
+        5. Remove digits/numbers.
+        6. Remove excessive whitespace at the beginning, end, and between words.
 
     Args:
-        text (str): Chuỗi văn bản đầu vào cần làm sạch.
+        text (str): The input text string to be cleaned.
 
     Returns:
-        str: Chuỗi văn bản sau khi đã được làm sạch và chuẩn hóa.
+        str: The text string after being cleaned and normalized.
     """
-    # Chuẩn hóa Unicode
+    # Normalize Unicode
     text = unicodedata.normalize("NFC", text)
-    
-    # Chuyển về chữ thường
+
+    # Convert to lowercase
     text = text.lower()
-    
-    # Loại bỏ URL, email
+
+    # Remove URLs and email addresses
     text = re.sub(r"http\S+|www\S+", " ", text)
     text = re.sub(r"\S+@\S+", " ", text)
-    
-    # Loại bỏ dấu câu và ký tự đặc biệt
-    text = re.sub(r"[^\w\s]", " ", text)  # giữ chữ + số + khoảng trắng
-    
-    # Loại bỏ số (tuỳ chọn)
+
+    # Remove punctuation and special characters
+    text = re.sub(r"[^\w\s]", " ", text)  # Keep only letters, numbers, and spaces
+
+    # Remove digits/numbers
     text = re.sub(r"\d+", " ", text)
-    
-    # Loại bỏ khoảng trắng thừa
+
+    # Remove excessive whitespace
     text = re.sub(r"\s+", " ", text).strip()
-    
+
     return text

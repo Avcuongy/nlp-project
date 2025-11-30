@@ -4,27 +4,29 @@ from underthesea import sent_tokenize as uts_sent_tokenize
 from nltk.tokenize import word_tokenize as nltk_word_tokenize
 from nltk.tokenize import sent_tokenize as nltk_sent_tokenize
 
-nltk.download('punkt')
+# Download the 'punkt' resource for NLTK sentence tokenization
+nltk.download("punkt")
+
 
 def vn_word_tokenize(text: str, method: str = "underthesea"):
     """
-    Tách từ trong văn bản tiếng Việt.
+    Tokenizes Vietnamese text into words.
 
-    Hàm này hỗ trợ tách từ sử dụng thư viện 'underthesea' (tối ưu cho tiếng Việt)
-    hoặc 'nltk' (tách từ cơ bản).
+    This function supports word tokenization using either the 'underthesea'
+    library (optimized for Vietnamese) or 'nltk' (basic tokenization).
 
     Args:
-        text (str): Văn bản đầu vào cần tách từ.
-        method (str, optional): Phương pháp tách từ. Mặc định là "underthesea".
-            Các giá trị hợp lệ:
-            - "underthesea": Sử dụng tokenizer của thư viện underthesea (khuyên dùng).
-            - "nltk": Sử dụng tokenizer của thư viện NLTK.
+        text (str): The input text to be tokenized.
+        method (str, optional): The tokenization method. Defaults to "underthesea".
+            Valid values:
+            - "underthesea": Uses the underthesea library's tokenizer (recommended).
+            - "nltk": Uses the NLTK library's tokenizer.
 
     Returns:
-        list: Danh sách các từ (tokens) sau khi tách.
+        list: A list of words (tokens) after tokenization.
 
     Raises:
-        ValueError: Nếu `method` không phải là 'underthesea' hoặc 'nltk'.
+        ValueError: If 'method' is neither 'underthesea' nor 'nltk'.
     """
     method = method.lower()
 
@@ -35,27 +37,28 @@ def vn_word_tokenize(text: str, method: str = "underthesea"):
         return nltk_word_tokenize(text)
 
     else:
-        raise ValueError("method phải là 'underthesea' hoặc 'nltk'.")
+        raise ValueError("The 'method' must be either 'underthesea' or 'nltk'.")
 
 
 def vn_sentence_tokenize(text: str, method: str = "underthesea"):
     """
-    Tách câu trong văn bản tiếng Việt.
+    Tokenizes Vietnamese text into sentences.
 
-    Hàm này hỗ trợ tách câu sử dụng thư viện 'underthesea' hoặc 'nltk'.
+    This function supports sentence tokenization using either the 'underthesea'
+    library or 'nltk'.
 
     Args:
-        text (str): Văn bản đầu vào cần tách câu.
-        method (str, optional): Phương pháp tách câu. Mặc định là "underthesea".
-            Các giá trị hợp lệ:
-            - "underthesea": Sử dụng tokenizer của thư viện underthesea (tối ưu cho tiếng Việt).
-            - "nltk": Sử dụng tokenizer của thư viện NLTK (dựa trên dấu câu).
+        text (str): The input text to be tokenized into sentences.
+        method (str, optional): The sentence tokenization method. Defaults to "underthesea".
+            Valid values:
+            - "underthesea": Uses the underthesea library's tokenizer (optimized for Vietnamese).
+            - "nltk": Uses the NLTK library's tokenizer (typically based on punctuation).
 
     Returns:
-        list: Danh sách các câu sau khi tách.
+        list: A list of sentences after tokenization.
 
     Raises:
-        ValueError: Nếu `method` không phải là 'underthesea' hoặc 'nltk'.
+        ValueError: If 'method' is neither 'underthesea' nor 'nltk'.
     """
     method = method.lower()
 
@@ -66,4 +69,4 @@ def vn_sentence_tokenize(text: str, method: str = "underthesea"):
         return nltk_sent_tokenize(text)
 
     else:
-        raise ValueError("method phải là 'underthesea' hoặc 'nltk'.")
+        raise ValueError("The 'method' must be either 'underthesea' or 'nltk'.")
