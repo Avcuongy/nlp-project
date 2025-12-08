@@ -1,7 +1,7 @@
 # Configuration file for NLP project
 project:
-  name: nlp-absa-project
-  description: Aspect-Based Sentiment Analysis (ABSA) for Vietnamese reviews car from youtube
+  name: nlp-prj
+  description: Aspect-Based Sentiment Analysis (ABSA) for Vietnamese reviews car from youtube comments
   language: vi
   seed: 42
 
@@ -19,11 +19,11 @@ paths:
 # Data settings
 dataset:
   task: absa
-  train_file: data/processed/train.csv
-  val_file: data/processed/val.csv
-  test_file: data/processed/test.csv
+  train_file: data/processed/train.json
+  val_file: data/processed/val.json
+  test_file: data/processed/test.json
   # Column names in your processed CSV files
-  text_column: text
+  text_column: comment
   aspect_column: aspect
   polarity_column: polarity
 
@@ -42,14 +42,13 @@ dataset:
     - key: cost
       description: Chi phí (giá bán, chi phí, tiết kiệm nhiên liệu, đáng tiền, sửa chữa, ...)
 
-  polarities: [positive, negative, neutral]
+  polarities: [positive, negative]
 
   # Optional: numeric ids for stable mapping in models/scripts
   mappings:
     polarity_to_id:
       negative: 0
-      neutral: 1
-      positive: 2
+      positive: 1
     aspect_to_id:
       brand: 0
       exterior: 1
@@ -57,11 +56,19 @@ dataset:
       performance: 3
       features: 4
       cost: 5
+  # Structured metadata per record in JSON files
+  schema:
+    brand: str       # Thương hiệu
+    model: str       # Tên mẫu xe
+    version: str     # Phiên bản của mẫu xe
+    year: str        # Năm sản xuất
+    comment: str     # Nội dung bình luận đánh giá
+    segment: str     # Phân khúc loại xe (categorical)
 
 # Experiment selector
 experiment:
-  model_family: svm # Select model: svm | logistic | xgboost | UNGTHU
-  search_method: grid # grid | random | optuna
+  model_family: svm # Select model: svm | logistic | xgboost | phobert
+  search_method: grid # grid for svm, logistic | optuna for xgboost, phobert
 
 # Model-specific configs
 ml_configs:
