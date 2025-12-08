@@ -1,7 +1,8 @@
 # Configuration file for NLP project
 project:
-  name: nlp-project
-  description: A project for Sentiment Analysis using various ML and DL models
+  name: nlp-absa-project
+  description: Aspect-Based Sentiment Analysis (ABSA) for Vietnamese reviews car from youtube
+  language: vi
   seed: 42
 
 # File
@@ -17,26 +18,56 @@ paths:
 
 # Data settings
 dataset:
+  task: absa
   train_file: data/processed/train.csv
   val_file: data/processed/val.csv
   test_file: data/processed/test.csv
+  # Column names in your processed CSV files
   text_column: text
-  label_column: label
-  label_map:
-    negative: 0
-    neutral: 1
-    positive: 2
+  aspect_column: aspect
+  polarity_column: polarity
+
+  # Label spaces
+  aspects:
+    - key: brand
+      description: Nhận diện thương hiệu
+    - key: exterior
+      description: Thiết kế bên ngoài (ngoại thất), Kiểu dáng, Các chi tiết bên ngoài
+    - key: interior
+      description: Nội thất của xe, Không gian bên trong
+    - key: performance
+      description: Vận hành (Động cơ, chạy êm, hộp số, vô lăng, phanh, chân ga, ...)
+    - key: features
+      description: Tính năng, trang bị, công nghệ
+    - key: cost
+      description: Chi phí (giá bán, chi phí, tiết kiệm nhiên liệu, đáng tiền, sửa chữa, ...)
+
+  polarities: [positive, negative, neutral]
+
+  # Optional: numeric ids for stable mapping in models/scripts
+  mappings:
+    polarity_to_id:
+      negative: 0
+      neutral: 1
+      positive: 2
+    aspect_to_id:
+      brand: 0
+      exterior: 1
+      interior: 2
+      performance: 3
+      features: 4
+      cost: 5
 
 # Experiment selector
 experiment:
-  model_family: svm # Select model: svm | a | b | UNGTHU
-  search_method: grid # grid | random
+  model_family: svm # Select model: svm | logistic | xgboost | UNGTHU
+  search_method: grid # grid | random | optuna
 
 # Model-specific configs
 ml_configs:
   svm: config/ml/svm.yaml
-  a: config/ml/a.yaml
-  b: config/ml/b.yaml
+  logistic: config/ml/logistic.yaml
+  xgboost: config/ml/xgboost.yaml
   UNGTHU: config/dl/UNGTHU.yaml
 
 # Save logs and checkpoints

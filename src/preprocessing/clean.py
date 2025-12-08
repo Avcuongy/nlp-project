@@ -1,7 +1,6 @@
 import re
 import unicodedata
 
-
 def vn_text_clean(text: str) -> str:
     """
     Clean and normalize Vietnamese text.
@@ -31,12 +30,17 @@ def vn_text_clean(text: str) -> str:
     text = re.sub(r"\S+@\S+", " ", text)
 
     # Remove punctuation and special characters
-    text = re.sub(r"[^\w\s]", " ", text)  # Keep only letters, numbers, and spaces
+    text = re.sub(r"[^\w\sÀ-ỹ]", " ", text)  # Keep only letters, numbers, and spaces
 
     # Remove digits/numbers
-    text = re.sub(r"\d+", " ", text)
+    #text = re.sub(r"\d+", " ", text)
 
     # Remove excessive whitespace
     text = re.sub(r"\s+", " ", text).strip()
 
     return text
+
+if __name__ == "__main__":
+    sample_text = "Xin chào! Đây là một ví dụ về văn bản Tiếng Việt. Liên hệ: 0932173 @gmail.com hoặc truy cập http://example.com. Giá là 1000 đồng."
+    cleaned_text = vn_text_clean(sample_text)
+    print(cleaned_text)
