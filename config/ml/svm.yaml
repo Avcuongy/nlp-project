@@ -4,7 +4,7 @@ type: ml
 
 # Cross-Validation
 cv_strategy:
-  type: stratified_kfold # stratified_kfold | kfold
+  type: kfold # kfold only as requested
   n_splits: 5
   shuffle: true
   random_state: 42
@@ -19,14 +19,3 @@ grid_search:
     C: [0.1, 1.0, 10.0, 100.0]
     kernel: ["linear", "rbf"]
     gamma: ["scale", "auto"]
-
-# RandomizedSearchCV
-random_search:
-  n_iter: 50
-  param_distributions:
-    C:
-      type: loguniform
-      low: 0.01
-      high: 100
-    kernel: ["linear", "rbf", "poly"]
-    gamma: ["scale", "auto", 0.001, 0.01]

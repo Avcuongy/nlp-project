@@ -6,9 +6,12 @@ scipy
 pandas
 matplotlib
 seaborn
+huggingface
 scikit-learn
 maturin
 underthesea
 pyvi
 nltk
+xgboost
+optuna
 streamlit
