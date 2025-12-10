@@ -72,11 +72,11 @@ experiment:
   search_method: grid # grid for svm, logistic | optuna for xgboost, phobert
 
 # Model-specific configs
-ml_configs:
+configs:
   svm: config/ml/svm.yaml
   logistic: config/ml/logistic.yaml
   xgboost: config/ml/xgboost.yaml
-  UNGTHU: config/dl/UNGTHU.yaml
+  phobert: config/dl/phobert.yaml
 
 # Save logs and checkpoints
 logging:

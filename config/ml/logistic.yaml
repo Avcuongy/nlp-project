@@ -2,19 +2,16 @@
 model: logistic
 type: ml
 
-# Cross-Validation
-cv_strategy:
-  type: kfold
-  n_splits: 5
-  shuffle: true
-  random_state: 42
-
-# Scoring metric
-scoring: f1_macro
-n_jobs: -1
-
 # GridSearchCV
 grid_search:
+  # Cross-Validation settings
+  cv: 5
+
+  # Scoring metric
+  scoring: f1_macro
+  n_jobs: -1
+
+  # Hyperparameter grid
   param_grid:
     C: [0.01, 0.1, 1.0, 10.0, 100.0]
     penalty: ["l2"]

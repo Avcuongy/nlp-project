@@ -2,19 +2,16 @@
 model: svm
 type: ml
 
-# Cross-Validation
-cv_strategy:
-  type: kfold # kfold only as requested
-  n_splits: 5
-  shuffle: true
-  random_state: 42
-
-# Scoring metric
-scoring: f1_macro # Evaluate model using f1_macro
-n_jobs: -1 # Use all available CPU cores
-
 # GridSearchCV
 grid_search:
+  # Cross-Validation settings
+  cv: 5
+
+  # Scoring metric
+  scoring: f1_macro
+  n_jobs: -1
+
+  # Hyperparameter grid
   param_grid:
     C: [0.1, 1.0, 10.0, 100.0]
     kernel: ["linear", "rbf"]
