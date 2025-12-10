@@ -56,14 +56,15 @@ dataset:
       performance: 3
       features: 4
       cost: 5
+
   # Structured metadata per record in JSON files
   schema:
-    brand: str       # Thương hiệu
-    model: str       # Tên mẫu xe
-    version: str     # Phiên bản của mẫu xe
-    year: str        # Năm sản xuất
-    comment: str     # Nội dung bình luận đánh giá
-    segment: str     # Phân khúc loại xe (categorical)
+    brand: str # Thương hiệu
+    model: str # Tên mẫu xe
+    version: str # Phiên bản của mẫu xe
+    year: str # Năm sản xuất
+    comment: str # Nội dung bình luận đánh giá
+    segment: str # Phân khúc loại xe (categorical)
 
 # Experiment selector
 experiment:
@@ -81,12 +82,12 @@ ml_configs:
 logging:
   tensorboard_dir: logs/tensorboard
   training_log: logs/training.log
-  hpo_dir: logs/hpo # (Optionally) Directory for HPO results
-  hpo_ml_dir: logs/hpo/ml # (Optionally) Separate HPO results for ML
-  hpo_dl_dir: logs/hpo/dl # (Optionally) Separate HPO results for DL
+  hpo_dir: logs/hpo # Directory for HPO results
+  hpo_ml_dir: logs/hpo/ml # Separate HPO results for ML
+  hpo_dl_dir: logs/hpo/dl # Separate HPO results for DL
 
 # Runtime settings
 runtime:
-  use_gpu: false
+  use_gpu: true
   batch_size: 32
   num_workers: 4
