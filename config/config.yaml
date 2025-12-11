@@ -42,13 +42,14 @@ dataset:
     - key: cost
       description: Chi phí (giá bán, chi phí, tiết kiệm nhiên liệu, đáng tiền, sửa chữa, ...)
 
-  polarities: [positive, negative]
+  polarities: [positive, negative, neutral]
 
   # Optional: numeric ids for stable mapping in models/scripts
   mappings:
     polarity_to_id:
       negative: 0
       positive: 1
+      neutral: 2
     aspect_to_id:
       brand: 0
       exterior: 1

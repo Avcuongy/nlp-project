@@ -2,64 +2,61 @@
 model: xgboost
 type: ml
 
-# Cross-Validation
-cv_strategy:
-  type: kfold
-  n_splits: 5
-  shuffle: true
-  random_state: 42
-
-# Scoring metric
-scoring: f1_macro
-n_jobs: -1
-
 # Optuna configuration for hyperparameter optimization
 optuna:
   study_name: "xgb_f1_macro"
-  direction: "maximize"
-  n_trials: 50
-  timeout: null
-  sampler:
-    type: tpe # tpe | cmaes | random
-    seed: 42
-  pruner:
-    type: median # median | halving | hyperband | none
+  direction: maximize # maximize f1_macro
+  n_trials: 50 # number of trials
+  timeout: null # seconds; null means no limit
 
-  # Search space definition
-  params:
+  sampler:
+    name: tpe # tpe | cmaes | random
+    seed: 42
+
+  pruner:
+    name: median # median | halving | hyperband | none
+
+  # Search space definition (Optuna suggest schema)
+  search_space:
     n_estimators:
-      type: int
+      suggest: int # trial.suggest_int
       low: 100
       high: 1000
       step: 50
     max_depth:
-      type: int
+      suggest: int
       low: 3
       high: 12
     learning_rate:
-      type: float
+      suggest: float # trial.suggest_float
       low: 0.01
       high: 0.3
-      log: true
+      log: true # use log scale
     subsample:
-      type: float
+      suggest: float
       low: 0.5
       high: 1.0
     colsample_bytree:
-      type: float
+      suggest: float
       low: 0.5
       high: 1.0
     gamma:
-      type: float
+      suggest: float
       low: 0.0
       high: 5.0
     reg_alpha:
-      type: float
-      low: 0.0
+      suggest: float
+      low: 1e-8
       high: 1.0
       log: true
     reg_lambda:
-      type: float
-      low: 0.0
+      suggest: float
+      low: 1e-8
       high: 1.0
       log: true
+
+  # XGBoost booster & objective
+  booster:
+    tree_method: auto # auto | hist | gpu_hist (if GPU enabled)
+    objective: multi:softprob # or binary:logistic depending on task
+
