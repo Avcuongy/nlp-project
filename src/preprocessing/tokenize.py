@@ -1,72 +1,48 @@
 import nltk
-from underthesea import word_tokenize as uts_word_tokenize
-from underthesea import sent_tokenize as uts_sent_tokenize
-from nltk.tokenize import word_tokenize as nltk_word_tokenize
-from nltk.tokenize import sent_tokenize as nltk_sent_tokenize
+from underthesea import word_tokenize
+from pyvi import ViTokenizer
 
 # Download the 'punkt' resource for NLTK sentence tokenization
 nltk.download("punkt")
 
 
-def vn_word_tokenize(text: str, method: str = "underthesea"):
+def vn_word_tokenize(text: str, method: str = "underthesea") -> str:
     """
-    Tokenizes Vietnamese text into words.
+    Tokenize Vietnamese text into a single string where tokens are separated by
+    spaces and multi-word phrases are joined with an underscore ('_').
 
-    This function supports word tokenization using either the 'underthesea'
-    library (optimized for Vietnamese) or 'nltk' (basic tokenization).
+    Supported methods:
+    - "underthesea": underthesea.word_tokenize with text output (phrases as điện_thoại)
+    - "pyvi": ViTokenizer.tokenize (returns string with underscores for phrases)
 
     Args:
-        text (str): The input text to be tokenized.
-        method (str, optional): The tokenization method. Defaults to "underthesea".
-            Valid values:
-            - "underthesea": Uses the underthesea library's tokenizer (recommended).
-            - "nltk": Uses the NLTK library's tokenizer.
+        text: Input text to tokenize.
+        method: One of {'underthesea', 'pyvi', 'nltk'}.
 
     Returns:
-        list: A list of words (tokens) after tokenization.
+        str: Tokenized text (e.g., "điện_thoại pin_tốt").
 
     Raises:
-        ValueError: If 'method' is neither 'underthesea' nor 'nltk'.
+        ValueError: If method is not supported.
     """
     method = method.lower()
 
     if method == "underthesea":
-        return uts_word_tokenize(text)
+        # Prefer string output with underscores for phrases if supported
+        try:
+            return word_tokenize(text, format="text")
+        except TypeError:
+            # Older versions: join list of tokens
+            toks = word_tokenize(text)
+            return " ".join(toks)
 
-    elif method == "nltk":
-        return nltk_word_tokenize(text)
+    if method == "pyvi":
+        return ViTokenizer.tokenize(text)
 
-    else:
-        raise ValueError("The 'method' must be either 'underthesea' or 'nltk'.")
+    raise ValueError("method must be one of: 'underthesea', 'pyvi', 'nltk'")
 
 
-def vn_sentence_tokenize(text: str, method: str = "underthesea"):
-    """
-    Tokenizes Vietnamese text into sentences.
-
-    This function supports sentence tokenization using either the 'underthesea'
-    library or 'nltk'.
-
-    Args:
-        text (str): The input text to be tokenized into sentences.
-        method (str, optional): The sentence tokenization method. Defaults to "underthesea".
-            Valid values:
-            - "underthesea": Uses the underthesea library's tokenizer (optimized for Vietnamese).
-            - "nltk": Uses the NLTK library's tokenizer (typically based on punctuation).
-
-    Returns:
-        list: A list of sentences after tokenization.
-
-    Raises:
-        ValueError: If 'method' is neither 'underthesea' nor 'nltk'.
-    """
-    method = method.lower()
-
-    if method == "underthesea":
-        return uts_sent_tokenize(text)
-
-    elif method == "nltk":
-        return nltk_sent_tokenize(text)
-
-    else:
-        raise ValueError("The 'method' must be either 'underthesea' or 'nltk'.")
+if __name__ == "__main__":
+    sample_text = "điện thoại pin tốt wifi mạnh giá rẻ"
+    print("Underthesea:", vn_word_tokenize(sample_text, method="underthesea"))
+    print("Pyvi:", vn_word_tokenize(sample_text, method="pyvi"))

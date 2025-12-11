@@ -44,20 +44,6 @@ dataset:
 
   polarities: [positive, negative, neutral]
 
-  # Optional: numeric ids for stable mapping in models/scripts
-  mappings:
-    polarity_to_id:
-      negative: 0
-      positive: 1
-      neutral: 2
-    aspect_to_id:
-      brand: 0
-      exterior: 1
-      interior: 2
-      performance: 3
-      features: 4
-      cost: 5
-
   # Structured metadata per record in JSON files
   schema:
     brand: str # Thương hiệu
