@@ -1,4 +1,5 @@
 # requirements.txt
+openpyxl
 joblib
 pyyaml
 numpy
