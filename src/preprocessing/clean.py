@@ -8,15 +8,18 @@ from utils.common import load_json
 
 @lru_cache(maxsize=1)
 def load_abbrev(path: str | None = None) -> dict[str, str]:
-    """Load and cache abbreviation mapping from JSON.
+    """Load and cache abbreviation mapping from a JSON-formatted file.
 
-    If no path is given, resolve from project root: data/external/abbreviation.json.
-    Returns an empty dict if file is missing or invalid.
+    Defaults to `data/external/abbreviation.txt` (now stored as JSON),
+    and falls back to `data/external/abbreviation.json` if the TXT file
+    is not present. Returns an empty dict if file is missing or invalid.
     """
     try:
+        root = Path(__file__).resolve().parents[2]
         if path is None:
-            root = Path(__file__).resolve().parents[2]
-            path = str(root / "data" / "external" / "abbreviation.json")
+            txt_path = root / "data" / "external" / "abbreviation.txt"
+            json_path = root / "data" / "external" / "abbreviation.json"
+            path = str(txt_path if txt_path.exists() else json_path)
         data = load_json(path)
         if isinstance(data, dict):
             return {str(k): str(v) for k, v in data.items()}
@@ -35,7 +38,7 @@ def apply_abbrev(text: str, abbrev: dict[str, str]) -> str:
 def vn_text_clean(text: str) -> str:
     # Normalize Vietnamese text
     text = unicodedata.normalize("NFC", text)
-    
+
     # Lowercase
     text = text.lower()
 
@@ -51,7 +54,7 @@ def vn_text_clean(text: str) -> str:
     text = re.sub(r"\.{2,}", ".", text)
     text = re.sub(r"[-~_*]{2,}", " ", text)  # Remove repeated special characters
     text = re.sub(r"(.)\1{2,}", r"\1", text)  # Remove repeated characters
-
+    
     # Normalize slang/abbreviations
     abbrev = load_abbrev()
     text = apply_abbrev(text, abbrev)
@@ -69,5 +72,7 @@ def vn_text_clean(text: str) -> str:
 
 
 if __name__ == "__main__":
-    sample = "Máy dùng okkkkk!!! pin .trâuuuu http://example.com hgg@gmail.com wf mạnh lắm~~~ không như mấy con đt khác..... con cá."
+    sample = """Máy dùng okkkkk!!! pin .trâuuuu http://example.com 
+    hgg@gmail.com wf mạnh lắm~~~ không như mấy con đt khác..... con cá.
+    Ok tới rồi nháaa!!! 12345"""
     print(vn_text_clean(sample))

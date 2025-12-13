@@ -1,4 +1,0 @@
-Gồm 3 tệp file được chia ra:
-    - train
-    - test
-    - validation
