@@ -23,4 +23,5 @@
     "đt": "điện tử",
     "ntn": "như thế nào",
     "xêm xêm": "bình thường"
+    "chát": "đắt"
 }

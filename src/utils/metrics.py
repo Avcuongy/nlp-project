@@ -43,33 +43,6 @@ def evaluate_classification(
     return {"accuracy": acc, "precision": float(p), "recall": float(r), "f1": float(f1)}
 
 
-def classification_text_report(
-    y_true: Iterable[Any],
-    y_pred: Iterable[Any],
-    *,
-    target_names: Optional[Iterable[str]] = None,
-) -> str:
-    """Return sklearn's classification_report as a string."""
-    return classification_report(y_true, y_pred, target_names=target_names)
-
-
-def compute_confusion_matrix(
-    y_true: Iterable[Any],
-    y_pred: Iterable[Any],
-    *,
-    labels: Optional[Iterable[Any]] = None,
-    normalize: Optional[str] = None,
-) -> np.ndarray:
-    """
-    Compute confusion matrix.
-
-    Args:
-            labels: Optional label order.
-            normalize: {'true','pred','all'} or None.
-    """
-    return confusion_matrix(y_true, y_pred, labels=labels, normalize=normalize)
-
-
 def try_compute_multiclass_auc(
     y_true: np.ndarray,
     y_proba: np.ndarray,

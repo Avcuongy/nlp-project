@@ -4,7 +4,7 @@ type: ml
 
 # Optuna configuration for hyperparameter optimization
 optuna:
-  study_name: "xgb_f1_macro"
+  study_name: "xgb_f1_micro"
   direction: maximize # maximize f1_macro
   n_trials: 50 # number of trials
   timeout: null # seconds; null means no limit
