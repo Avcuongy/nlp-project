@@ -10,30 +10,48 @@ from utils.common import load_json
 
 @lru_cache(maxsize=1)
 def load_abbrev(path: str | None = None) -> dict[str, str]:
-    """Load and cache abbreviation mapping from a JSON-formatted file.
+    """Load and cache abbreviation mapping from a .txt file.
 
-    Defaults to `data/external/abbreviation.txt` (now stored as JSON),
-    and falls back to `data/external/abbreviation.json` if the TXT file
-    is not present. Returns an empty dict if file is missing or invalid.
+    Only supports text format where each line is "key: value" (split by the
+    first colon). Leading/trailing spaces are trimmed. Lines without a colon
+    will be split by the first whitespace. Blank or comment lines are ignored.
 
     Args:
-        path (str | None, optional): Path to abbreviation file. Defaults to None.
+        path (str | None, optional): Path to abbreviation .txt file. Defaults to
+            `data/external/abbreviation.txt`.
 
     Returns:
         dict[str, str]: Mapping of abbreviations to their expansions.
     """
+    root = Path(__file__).resolve().parents[2]
     try:
-        root = Path(__file__).resolve().parents[2]
         if path is None:
-            txt_path = root / "data" / "external" / "abbreviation.txt"
-            json_path = root / "data" / "external" / "abbreviation.json"
-            path = str(txt_path if txt_path.exists() else json_path)
-        data = load_json(path)
-        if isinstance(data, dict):
-            return {str(k): str(v) for k, v in data.items()}
+            path = str(root / "data" / "external" / "abbreviation.txt")
+
+        p = Path(path)
+        if p.suffix.lower() != ".txt" or not p.exists():
+            return {}
+
+        mapping: dict[str, str] = {}
+        with p.open("r", encoding="utf-8") as f:
+            for line in f:
+                raw = line.strip()
+                if not raw or raw.startswith("#"):
+                    continue
+                if ":" in raw:
+                    k, v = raw.split(":", 1)
+                else:
+                    parts = raw.split(None, 1)
+                    if len(parts) != 2:
+                        continue
+                    k, v = parts
+                k = k.strip()
+                v = v.strip()
+                if k and v:
+                    mapping[str(k)] = str(v)
+        return mapping
     except Exception:
-        pass
-    return {}
+        return {}
 
 
 def apply_abbrev(text: str, abbrev: dict[str, str]) -> str:
@@ -103,14 +121,13 @@ def vn_text_clean(text: str) -> str:
 
 if __name__ == "__main__":
     sample = """Mình đang dùng xe Xforce Ultimate. Lấy xe từ 20/11/24. Sau thời gian sử dụng mình thấy có ưu và nhược như này: 
-            1. Nhược điểm: 
-            - Camera lùi không được nét. 
+            Nhược điểm: 
+            - Camera lùi không được nét. auto@gmail.com
             - Nội thất chỉ có màu đen. Nhìn sẽ hơi tối. Bẩn nhanh lộ. 
-            - Sau khoảng 5000km đi thì bị kêu khá to khi rà phanh đi chậm. Đã liên hệ hãng. Hãng đang báo sẽ thay đĩa phanh. Mình đang đợi phanh về để thay. Chưa thay nhưng đợt này đi lại không kêu nữa. 
-            2. Ưu điểm: 
-            - Đẹp, rộng rãi, đầy đô đt. Nhìn ngoài rất bệ vệ. Chất liệu nội thất ok. Màn hình to. 
-            - Quá đủ các tính năng an toàn. Phanh tay điện tử, auto hold, đèn tự động, gạt mưa tự động, cánh báo giảm thiểu va chạm, cảm biến áp suất lốp theo xe…nói chung thoải mái dùng. 
-            - Cách âm tốt. Loa nghe rất hay. 
-            - Lái rất nhẹ nhàng. Quan sát tốt. 
-            - Rất tiết kiệm nhiên liệu. Lái đường cao tốc chưa đến 5l/100km."""
+            - Sau khoảng 5000km đi thì bị kêu khá to khi rà phanh đi chậm. Đã liên hệ hãng. 
+            Hãng đang báo sẽ thay đĩa phanh. 
+            Mình đang đợi phanh về để thay. Chưa thay nhưng đợt này đi lại không kêu nữa.
+            lol cái ni trông xịn vl
+            Liên hệ web: https://example.com/test?query=abc
+            Giá xe hơi cao so với mặt bằng chung!!!            Liên hệ: 0123-456-789"""
     print(vn_text_clean(sample))
