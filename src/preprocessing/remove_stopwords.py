@@ -8,7 +8,11 @@ from pathlib import Path
 def _load_stopwords(path: str | None = None) -> tuple[set[str], set[str]]:
     """Load Vietnamese stopwords from text file.
 
-    Returns (singles, phrases), both sets of underscore-normalized tokens.
+    Args:
+        path (str | None, optional): Path to stopwords file. Defaults to None.
+
+    Returns:
+        tuple[set[str], set[str]]: (singles, phrases) sets of stopwords.
     """
     if path is None:
         root = Path(__file__).resolve().parents[2]
@@ -35,7 +39,14 @@ def _load_stopwords(path: str | None = None) -> tuple[set[str], set[str]]:
 
 
 def remove_stopwords(text: str) -> str:
-    """Remove Vietnamese stopwords from space-tokenized text and rejoin."""
+    """Remove Vietnamese stopwords from space-tokenized text and rejoin.
+
+    Args:
+        text (str): Input text with tokens separated by spaces.
+
+    Returns:
+        str: Text with stopwords removed.
+    """
     singles, phrases = _load_stopwords()
 
     # Split exactly by a single space per requirement

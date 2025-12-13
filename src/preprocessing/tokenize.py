@@ -43,6 +43,6 @@ def vn_word_tokenize(text: str, method: str = "underthesea") -> str:
 
 
 if __name__ == "__main__":
-    sample_text = "điện thoại pin tốt wifi mạnh giá rẻ"
-    print("Underthesea:", vn_word_tokenize(sample_text, method="underthesea"))
-    print("Pyvi:", vn_word_tokenize(sample_text, method="pyvi"))
+    sample = "ô tô điện này có pin tốt wifi mạnh giá rẻ với nền tảng tính năng đa dạng, ổn định."
+    print("Underthesea:", vn_word_tokenize(sample, method="underthesea"))
+    print("Pyvi:", vn_word_tokenize(sample, method="pyvi"))

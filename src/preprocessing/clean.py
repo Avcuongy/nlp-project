@@ -15,6 +15,12 @@ def load_abbrev(path: str | None = None) -> dict[str, str]:
     Defaults to `data/external/abbreviation.txt` (now stored as JSON),
     and falls back to `data/external/abbreviation.json` if the TXT file
     is not present. Returns an empty dict if file is missing or invalid.
+
+    Args:
+        path (str | None, optional): Path to abbreviation file. Defaults to None.
+
+    Returns:
+        dict[str, str]: Mapping of abbreviations to their expansions.
     """
     try:
         root = Path(__file__).resolve().parents[2]
@@ -31,13 +37,29 @@ def load_abbrev(path: str | None = None) -> dict[str, str]:
 
 
 def apply_abbrev(text: str, abbrev: dict[str, str]) -> str:
-    """Apply abbreviation replacements to text using word-boundary safe regex."""
+    """Apply abbreviation replacements to text using word-boundary safe regex.
+
+    Args:
+        text (str): Input text.
+        abbrev (dict[str, str]): Mapping of abbreviations to expansions.
+
+    Returns:
+        str: Text with abbreviations replaced.
+    """
     for k, v in abbrev.items():
         text = re.sub(rf"\b{re.escape(k)}\b", v, text)
     return text
 
 
 def vn_text_clean(text: str) -> str:
+    """Clean Vietnamese text.
+
+    Args:
+        text (str): Input Vietnamese text.
+
+    Returns:
+        str: Cleaned text.
+    """
     # Normalize Vietnamese text
     text = unicodedata.normalize("NFC", text)
 
@@ -86,7 +108,7 @@ if __name__ == "__main__":
             - Nội thất chỉ có màu đen. Nhìn sẽ hơi tối. Bẩn nhanh lộ. 
             - Sau khoảng 5000km đi thì bị kêu khá to khi rà phanh đi chậm. Đã liên hệ hãng. Hãng đang báo sẽ thay đĩa phanh. Mình đang đợi phanh về để thay. Chưa thay nhưng đợt này đi lại không kêu nữa. 
             2. Ưu điểm: 
-            - Đẹp, rộng rãi. Nhìn ngoài rất bệ vệ. Chất liệu nội thất ok. Màn hình to. 
+            - Đẹp, rộng rãi, đầy đô đt. Nhìn ngoài rất bệ vệ. Chất liệu nội thất ok. Màn hình to. 
             - Quá đủ các tính năng an toàn. Phanh tay điện tử, auto hold, đèn tự động, gạt mưa tự động, cánh báo giảm thiểu va chạm, cảm biến áp suất lốp theo xe…nói chung thoải mái dùng. 
             - Cách âm tốt. Loa nghe rất hay. 
             - Lái rất nhẹ nhàng. Quan sát tốt. 
