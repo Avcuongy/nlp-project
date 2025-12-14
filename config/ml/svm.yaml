@@ -13,6 +13,6 @@ grid_search:
 
   # Hyperparameter grid
   param_grid:
-    C: [0.1, 1.0, 10.0, 100.0]
+    C: [1, 50, 40]
     kernel: ["linear", "rbf", "poly", "sigmoid"]
     gamma: ["scale", "auto"]
