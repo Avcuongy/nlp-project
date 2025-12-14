@@ -414,3 +414,5 @@ klq: không liên quan
 ni: này
 vl: vãi lồn
 trùm: tốt nhất
+tốt: rẻ
+hầm hố: lực

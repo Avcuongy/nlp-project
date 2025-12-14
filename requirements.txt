@@ -17,4 +17,5 @@ nltk
 xgboost
 optuna
 transformers
+tensorflow
 streamlit
