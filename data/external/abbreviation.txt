@@ -413,3 +413,4 @@ sđt: số điện thoại
 klq: không liên quan
 ni: này
 vl: vãi lồn
+trùm: tốt nhất
