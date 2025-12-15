@@ -211,5 +211,6 @@ __marimo__/
 .github/
 logs/
 models/
+docs/
 
 STRUCTURE*.md

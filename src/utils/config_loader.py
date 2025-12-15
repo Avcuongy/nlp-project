@@ -8,6 +8,7 @@ from .common import ensure_dir
 
 
 def _import_yaml():
+    """Import PyYAML library, raising an informative error if not installed."""
     try:
         import yaml  # type: ignore
 
@@ -21,6 +22,12 @@ def _import_yaml():
 def load_yaml_file(path: str | os.PathLike) -> Dict[str, Any]:
     """
     Load a YAML file into a Python dictionary using safe loader.
+
+    Args:
+        path (str | os.PathLike): Path to the YAML file.
+
+    Returns:
+        Dict[str, Any]: Parsed YAML content as a dictionary.
     """
     yaml = _import_yaml()
     with Path(path).open("r", encoding="utf-8") as f:
@@ -28,7 +35,12 @@ def load_yaml_file(path: str | os.PathLike) -> Dict[str, Any]:
 
 
 def save_yaml_file(path: str | os.PathLike, data: Mapping[str, Any]) -> None:
-    """Save a mapping to a YAML file (UTF-8)."""
+    """Save a mapping to a YAML file (UTF-8).
+
+    Args:
+        path (str | os.PathLike): Path to save the YAML file.
+        data (Mapping[str, Any]): Data to serialize and save.
+    """
     yaml = _import_yaml()
     p = Path(path)
     ensure_dir(p.parent)
@@ -40,6 +52,13 @@ def deep_update(base: Dict[str, Any], overrides: Mapping[str, Any]) -> Dict[str,
     """
     Recursively update a nested dictionary with another mapping.
     Returns a new dictionary; does not mutate inputs.
+
+    Args:
+        base (Dict[str, Any]): Base dictionary to update.
+        overrides (Mapping[str, Any]): Overrides to apply.
+
+    Returns:
+        Dict[str, Any]: New dictionary with updates applied.
     """
     result: Dict[str, Any] = dict(base)
     for k, v in overrides.items():
@@ -51,7 +70,14 @@ def deep_update(base: Dict[str, Any], overrides: Mapping[str, Any]) -> Dict[str,
 
 
 def expand_env_vars(cfg: Dict[str, Any]) -> Dict[str, Any]:
-    """Expand environment variables in all string values of a nested config dict."""
+    """Expand environment variables in all string values of a nested config dict.
+
+    Args:
+        cfg (Dict[str, Any]): Configuration dictionary.
+
+    Returns:
+        Dict[str, Any]: Configuration with environment variables expanded.
+    """
 
     def _expand(value: Any) -> Any:
         if isinstance(value, str):
@@ -69,6 +95,12 @@ def load_project_config(config_path: str | os.PathLike) -> Dict[str, Any]:
     """
     Load the main project config (config/config.yaml), expand env vars,
     and normalize common path fields to POSIX-style strings.
+
+    Args:
+        config_path (str | os.PathLike): Path to the project config YAML file.
+
+    Returns:
+        Dict[str, Any]: Loaded and processed configuration dictionary.
     """
     cfg = load_yaml_file(config_path)
     cfg = expand_env_vars(cfg)
@@ -86,6 +118,12 @@ def load_model_config(project_cfg: Mapping[str, Any]) -> Dict[str, Any]:
     """
     Resolve and load the model-specific YAML based on experiment.model_family.
     Merge project-level hints (if any) onto the model config.
+    
+    Args:
+        project_cfg (Mapping[str, Any]): Loaded project configuration.
+        
+    Returns:
+        Dict[str, Any]: Loaded and merged model configuration.
     """
     exp = project_cfg.get("experiment", {})
     model_family = exp.get("model_family")
@@ -113,3 +151,17 @@ def load_model_config(project_cfg: Mapping[str, Any]) -> Dict[str, Any]:
         model_cfg = deep_update(model_cfg, overrides)
 
     return model_cfg
+
+
+def load_config(config_path: str | os.PathLike) -> Dict[str, Any]:
+    """Load a configuration YAML file and expand environment variables.
+
+    Args:
+        config_path (str | os.PathLike): Path to YAML config file.
+
+    Returns:
+        Dict[str, Any]: Configuration dictionary.
+    """
+    cfg = load_yaml_file(config_path)
+    cfg = expand_env_vars(cfg)
+    return cfg

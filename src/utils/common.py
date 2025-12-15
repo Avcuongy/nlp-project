@@ -39,6 +39,12 @@ def set_seed(seed: int = 42, deterministic: bool = False) -> None:
 def get_device(use_gpu: bool = True) -> str:
     """
     Return computing device string: "cuda" if available and requested, otherwise "cpu".
+
+    Args:
+        use_gpu (bool): Whether to attempt using GPU if available.
+
+    Returns:
+        str: "cuda" or "cpu"
     """
     if not use_gpu:
         return "cpu"
@@ -53,6 +59,12 @@ def get_device(use_gpu: bool = True) -> str:
 def ensure_dir(path: os.PathLike | str) -> Path:
     """
     Create directory if it does not exist and return the Path object.
+
+    Args:
+        path (os.PathLike | str): Directory path to ensure.
+
+    Returns:
+        str: The ensured directory path as a Path object.
     """
     p = Path(path)
     p.mkdir(parents=True, exist_ok=True)
@@ -60,14 +72,28 @@ def ensure_dir(path: os.PathLike | str) -> Path:
 
 
 def timestamp(fmt: str = "%Y%m%d_%H%M%S") -> str:
-    """Return a formatted timestamp string."""
+    """Return a formatted timestamp string.
+
+    Args:
+        fmt (str): Datetime format string.
+
+    Returns:
+        str: Formatted current timestamp.
+    """
     return datetime.now().strftime(fmt)
 
 
 def save_json(
     path: os.PathLike | str, obj: Any, *, ensure_ascii: bool = False, indent: int = 2
 ) -> None:
-    """Save a Python object as JSON to the given path."""
+    """Save a Python object as JSON to a file.
+
+    Args:
+        path (os.PathLike | str): File path to save JSON.
+        obj (Any): Python object to serialize.
+        ensure_ascii (bool, optional): Whether to escape non-ASCII characters. Defaults to False.
+        indent (int, optional): Indentation level for pretty-printing. Defaults to 2.
+    """
     p = Path(path)
     ensure_dir(p.parent)
     with p.open("w", encoding="utf-8") as f:
@@ -75,13 +101,25 @@ def save_json(
 
 
 def load_json(path: os.PathLike | str) -> Any:
-    """Load JSON content from a file and return the corresponding Python object."""
+    """Load JSON content from a file and return the corresponding Python object.
+
+    Args:
+        path (os.PathLike | str): File path to load JSON from.
+
+    Returns:
+        Any: Deserialized Python object.
+    """
     with Path(path).open("r", encoding="utf-8") as f:
         return json.load(f)
 
 
 def save_pickle(path: os.PathLike | str, obj: Any) -> None:
-    """Serialize a Python object to a pickle file."""
+    """Serialize a Python object to a pickle file.
+
+    Args:
+        path (os.PathLike | str): File path to save the pickle.
+        obj (Any): Python object to serialize.
+    """
     p = Path(path)
     ensure_dir(p.parent)
     with p.open("wb") as f:
@@ -89,19 +127,40 @@ def save_pickle(path: os.PathLike | str, obj: Any) -> None:
 
 
 def load_pickle(path: os.PathLike | str) -> Any:
-    """Load a Python object from a pickle file."""
+    """Load a Python object from a pickle file.
+
+    Args:
+        path (os.PathLike | str): File path to load the pickle from.
+
+    Returns:
+        Any: Deserialized Python object.
+    """
     with Path(path).open("rb") as f:
         return pickle.load(f)
 
 
 def read_text(path: os.PathLike | str, encoding: str = "utf-8") -> str:
-    """Read entire text file content."""
+    """Read entire text file content.
+
+    Args:
+        path (os.PathLike | str): File path to read.
+        encoding (str, optional): File encoding. Defaults to "utf-8".
+
+    Returns:
+        str: File content as a string.
+    """
     with Path(path).open("r", encoding=encoding) as f:
         return f.read()
 
 
 def write_text(path: os.PathLike | str, text: str, encoding: str = "utf-8") -> None:
-    """Write text content to a file, creating parent directories if needed."""
+    """Write text content to a file, creating parent directories if needed.
+
+    Args:
+        path (os.PathLike | str): File path to write.
+        text (str): Text content to write.
+        encoding (str, optional): File encoding. Defaults to "utf-8".
+    """
     p = Path(path)
     ensure_dir(p.parent)
     with p.open("w", encoding=encoding) as f:
@@ -109,7 +168,14 @@ def write_text(path: os.PathLike | str, text: str, encoding: str = "utf-8") -> N
 
 
 def resolve_path(*parts: str | os.PathLike) -> Path:
-    """Join and resolve a filesystem path from multiple parts."""
+    """Join and resolve a filesystem path from multiple parts.
+
+    Args:
+        *parts (str | os.PathLike): Path components to join.
+
+    Returns:
+        Path: Resolved absolute Path object.
+    """
     return Path(*parts).expanduser().resolve()
 
 
@@ -121,6 +187,13 @@ def get_logger(name: str = "nlp_project", level: int = logging.INFO) -> logging.
     Get a configured logger that logs to stdout with a concise formatter.
 
     The configuration is applied once per process.
+
+    Args:
+        name (str): Logger name.
+        level (int): Logging level.
+
+    Returns:
+        logging.Logger: Configured logger instance.
     """
     global _LOGGER_INITIALIZED
     logger = logging.getLogger(name)
@@ -142,7 +215,14 @@ def get_logger(name: str = "nlp_project", level: int = logging.INFO) -> logging.
 
 
 def chunked(iterable: Iterable[Any], size: int) -> Iterable[list[Any]]:
-    """Yield successive chunks from an iterable."""
+    """Yield successive chunks from an iterable.
+    Args:
+        iterable (Iterable[Any]): Input iterable.
+        size (int): Chunk size.
+
+    Returns:
+        Iterable[list[Any]]: Yields lists of chunked items.
+    """
     chunk: list[Any] = []
     for item in iterable:
         chunk.append(item)
