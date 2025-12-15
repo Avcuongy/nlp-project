@@ -18,9 +18,6 @@ from src.utils.metrics import get_scorer
 class SVMModel:
     """SVM Model with OneVsRestClassifier for multi-label ABSA.
 
-    This class encapsulates the full ML pipeline: hyperparameter tuning
-    via GridSearchCV, training, prediction, and evaluation.
-
     Attributes:
         config (dict): Configuration dictionary loaded from YAML.
         model (OneVsRestClassifier): The underlying SVM classifier.
@@ -48,7 +45,7 @@ class SVMModel:
 
     def _build_model(self) -> OneVsRestClassifier:
         """Build the OneVsRestClassifier with SVC base estimator.
-    
+
         Returns:
             OneVsRestClassifier: Initialized model.
         """
@@ -56,9 +53,6 @@ class SVMModel:
 
     def _build_param_grid(self) -> Dict[str, Any]:
         """Build parameter grid for GridSearchCV from config.
-
-        The config stores params like C, kernel, gamma. We need to
-        prefix them with 'estimator__' for OneVsRestClassifier.
 
         Returns:
             dict: Parameter grid with proper prefixes.
