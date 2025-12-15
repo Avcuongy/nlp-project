@@ -12,7 +12,7 @@ grid_search:
   n_jobs: -1
 
   # Hyperparameter grid
-  params_grid:
+  param_grid:
     C: [1, 20, 40]
     kernel: ["linear", "rbf", "poly", "sigmoid"]
     gamma: ["scale", "auto"]
