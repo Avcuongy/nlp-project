@@ -19,13 +19,16 @@ paths:
 # Data settings
 dataset:
   task: absa
-  train_file: data/processed/train.json
-  val_file: data/processed/val.json
-  test_file: data/processed/test.json
+
+  # Processed data files
+  train_file: data/processed/train.csv
+  val_file: data/processed/val.csv
+  test_file: data/processed/test.csv
+  file_type: csv
+
   # Column names in your processed CSV files
   text_column: comment
-  aspect_column: aspect
-  polarity_column: polarity
+  label_column: label # format: ASPECT#Polarity (multi-label separated by ';')
 
   # Label spaces
   aspects:
@@ -44,7 +47,7 @@ dataset:
 
   polarities: [positive, negative, neutral]
 
-  # Structured metadata per record in JSON files
+  # Structured metadata per record (if present in CSV or auxiliary files)
   schema:
     brand: str # Thương hiệu
     model: str # Tên mẫu xe
