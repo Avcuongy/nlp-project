@@ -7,7 +7,7 @@ def build_tfidf_vectorizer(
     analyzer: str = "word",
     min_df: int = 3,
     max_df: float = 0.95,
-    ngram_range: Tuple[int, int] = (3, 5),
+    ngram_range: Tuple[int, int] = (1, 2),
     sublinear_tf: bool = True,
     max_features: Optional[int] = 30000,
 ) -> TfidfVectorizer:
