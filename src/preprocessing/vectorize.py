@@ -4,17 +4,17 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 def build_tfidf_vectorizer(
-    analyzer: str = "word",
+    analyzer: str = "char",
     min_df: int = 3,
     max_df: float = 0.95,
-    ngram_range: Tuple[int, int] = (1, 2),
+    ngram_range: Tuple[int, int] = (3, 5),
     sublinear_tf: bool = True,
     max_features: Optional[int] = 30000,
 ) -> TfidfVectorizer:
     """Create a configured TfidfVectorizer for Vietnamese ABSA.
 
     Args:
-        analyzer (str, optional): _description_. Defaults to "word".
+        analyzer (str, optional): _description_. Defaults to "char".
         min_df (int, optional): _description_. Defaults to 3.
         max_df (float, optional): _description_. Defaults to 0.95.
         ngram_range (Tuple[int, int], optional): _description_. Defaults to (3, 5).
