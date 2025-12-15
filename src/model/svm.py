@@ -12,7 +12,7 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.svm import SVC
 
 from src.utils.config_loader import load_config
-from src.utils.metrics import get_scorer
+from src.utils.metrics import get_scorer, evaluate
 
 
 class SVMModel:
@@ -131,6 +131,27 @@ class SVMModel:
 
         return self
 
+    def evaluate(
+        self,
+        X_test: np.ndarray | pd.DataFrame,
+        y_test: np.ndarray | pd.DataFrame,
+        label_names: Optional[list[str]] = None,
+        verbose: bool = True,
+    ) -> Dict[str, float]:
+        """Evaluate the model on test data using shared metrics utilities.
+
+        Args:
+
+        Returns:
+        """
+        if isinstance(X_test, pd.DataFrame):
+            X_test = X_test.values
+
+        y_pred = self.predict(X_test)
+        return evaluate(
+            y_true=y_test, y_pred=y_pred, label_names=label_names, verbose=verbose
+        )
+
     def predict(self, X: np.ndarray | pd.DataFrame) -> np.ndarray:
         """Predict labels for input samples.
 
@@ -152,73 +173,6 @@ class SVMModel:
             X = X.values
 
         return self.best_estimator_.predict(X)
-
-    def evaluate(
-        self,
-        X_test: np.ndarray | pd.DataFrame,
-        y_test: np.ndarray | pd.DataFrame,
-        label_names: Optional[list[str]] = None,
-        verbose: bool = True,
-    ) -> Dict[str, float]:
-        """Evaluate the model on test data.
-
-        Args:
-            X_test: Test features.
-            y_test: Test labels (binary matrix).
-            label_names (list[str] | None): Names of label classes for report.
-            verbose (bool): Whether to print evaluation results.
-
-        Returns:
-            dict: Dictionary of metrics (precision, recall, f1 for micro/macro).
-        """
-        # Convert to arrays
-        if isinstance(X_test, pd.DataFrame):
-            X_test = X_test.values
-        if isinstance(y_test, pd.DataFrame):
-            y_test_arr = y_test.values
-        else:
-            y_test_arr = y_test
-
-        # Predict
-        y_pred = self.predict(X_test)
-
-        # Compute metrics
-        from sklearn.metrics import precision_score, recall_score
-
-        metrics = {
-            "precision_micro": precision_score(
-                y_test_arr, y_pred, average="micro", zero_division=0
-            ),
-            "recall_micro": recall_score(
-                y_test_arr, y_pred, average="micro", zero_division=0
-            ),
-            "f1_micro": f1_score(y_test_arr, y_pred, average="micro", zero_division=0),
-            "precision_macro": precision_score(
-                y_test_arr, y_pred, average="macro", zero_division=0
-            ),
-            "recall_macro": recall_score(
-                y_test_arr, y_pred, average="macro", zero_division=0
-            ),
-            "f1_macro": f1_score(y_test_arr, y_pred, average="macro", zero_division=0),
-        }
-
-        if verbose:
-            print("\n=== Evaluation Results ===")
-            print(
-                pd.DataFrame.from_dict(
-                    metrics, orient="index", columns=["Score"]
-                ).round(4)
-            )
-
-            if label_names is not None:
-                print("\n=== Classification Report ===")
-                print(
-                    classification_report(
-                        y_test_arr, y_pred, target_names=label_names, zero_division=0
-                    )
-                )
-
-        return metrics
 
     def save(self, path: str) -> None:
         """Save the trained model to disk.
@@ -262,17 +216,6 @@ class SVMModel:
 
         return self
 
-    def get_feature_importance(self) -> None:
-        """SVM does not provide direct feature importance.
-
-        For linear kernel, coefficients can be extracted, but this is complex
-        with OneVsRestClassifier. This method is a placeholder.
-        """
-        print("Feature importance not directly available for SVM.")
-        print("For linear kernel, you can inspect model.estimators_[i].coef_")
-
 
 if __name__ == "__main__":
-    # Example usage
-    print("SVM Model module loaded successfully.")
-    print("Use: model = SVMModel() to initialize.")
+    pass

@@ -51,8 +51,8 @@ def main():
     print("\n2. Transforming labels to binary matrix...")
     matrix_labels_train, mlb_train = matrix_labels(df_train[["label"]])
     matrix_labels_val, mlb_val = matrix_labels(df_val[["label"]])
-    print(f"   Number of labels: {len(mlb_train.classes_)}")
-    print(f"   Labels: {list(mlb_train.classes_)}")
+    print(f"\tNumber of labels: {len(mlb_train.classes_)}")
+    print(f"\tLabels: {list(mlb_train.classes_)}")
 
     # Prepare train/val splits
     X_train = df_train[["comment"]]
@@ -66,9 +66,9 @@ def main():
     vec = build_tfidf_vectorizer()
     X_train_vec = vec.fit_transform(X_train["comment"])
     X_val_vec = vec.transform(X_val["comment"])
-    print(f"   Train shape: {X_train_vec.shape}")
-    print(f"   Val shape: {X_val_vec.shape}")
-    print(f"   Vocabulary size: {len(vec.get_feature_names_out())}")
+    print(f"\tTrain shape: {X_train_vec.shape}")
+    print(f"\tVal shape: {X_val_vec.shape}")
+    print(f"\tVocabulary size: {len(vec.get_feature_names_out())}")
 
     # Initialize and train model
     print(f"\n4. Training {args.model.upper()} model...")
@@ -101,7 +101,7 @@ def main():
     model.save(save_path)
 
     print("\n" + "=" * 80)
-    print("Training completed successfull !")
+    print("Training completed successfully")
     print("=" * 80)
 
 
