@@ -63,7 +63,15 @@ def apply_abbrev(text: str, abbrev: dict[str, str]) -> str:
         str: Text with abbreviations replaced.
     """
     for k, v in abbrev.items():
-        text = re.sub(rf"\b{re.escape(k)}\b", v, text)
+        # Skip empty keys defensively
+        if not k:
+            continue
+        pattern = rf"\b{re.escape(k)}\b"
+        try:
+            text = re.sub(pattern, v, text)
+        except re.error:
+            # If a malformed key causes regex compilation to fail, skip it
+            continue
     return text
 
 

@@ -191,7 +191,6 @@ class SVMModel:
         }
 
         joblib.dump(save_obj, path)
-        print(f"Model saved to {path}")
 
     def load(self, path: str) -> "SVMModel":
         """Load a trained model from disk.

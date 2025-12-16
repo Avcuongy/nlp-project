@@ -1,11 +1,17 @@
 import argparse
 from pathlib import Path
+from joblib import dump
 
 import pandas as pd
-from joblib import dump
+import warnings
+
+warnings.filterwarnings("ignore")
 
 from model.svm import SVMModel
 from preprocessing.vectorize import build_tfidf_vectorizer
+from preprocessing.clean import vn_text_clean
+from preprocessing.tokenize import vn_word_tokenize
+from preprocessing.remove_stopwords import remove_stopwords
 from utils.other import matrix_labels
 
 
@@ -35,8 +41,10 @@ def main():
 
     # Setup paths
     root = Path(__file__).resolve().parents[1]
-    train_path = root / "data" / "processed" / "train.csv"
-    val_path = root / "data" / "processed" / "val.csv"
+
+    # Read raw data for train/val to follow the standard pipeline
+    train_path = root / "data" / "raw" / "train.csv"
+    val_path = root / "data" / "raw" / "val.csv"
 
     print("=" * 80)
     print(f"TRAINING {args.model.upper()} MODEL".center(80))
@@ -56,14 +64,28 @@ def main():
     print(f"\tLabels: {list(mlb_train.classes_)}")
 
     # Prepare train/val splits
-    X_train = df_train[["comment"]]
+    X_train = df_train[["comment"]].copy()
     y_train = matrix_labels_train
 
-    X_val = df_val[["comment"]]
+    X_val = df_val[["comment"]].copy()
     y_val = matrix_labels_val
 
+    # 2.1 Preprocess text: clean -> tokenize -> remove stopwords
+    print("\n2.1 PREPROCESSING TEXT...")
+
+    def preprocess_series(s):
+        return (
+            s.astype(str)
+            .map(vn_text_clean)
+            .map(lambda t: vn_word_tokenize(t, method="underthesea"))
+            .map(remove_stopwords)
+        )
+
+    X_train["comment"] = preprocess_series(X_train["comment"])
+    X_val["comment"] = preprocess_series(X_val["comment"])
+
     # Vectorize
-    print("\n3. Vectorizing text with TF-IDF...")
+    print("\n3. VECTORIZING TEXT WITH TF-IDF...")
     vec = build_tfidf_vectorizer()
     X_train_vec = vec.fit_transform(X_train["comment"])
     X_val_vec = vec.transform(X_val["comment"])
