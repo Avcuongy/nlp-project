@@ -1,4 +1,5 @@
 import argparse
+import json
 from pathlib import Path
 from joblib import dump
 
@@ -11,7 +12,7 @@ from model.svm import SVMModel
 from preprocessing.vectorize import build_tfidf_vectorizer
 from preprocessing.clean import vn_text_clean
 from preprocessing.tokenize import vn_word_tokenize
-from preprocessing.remove_stopwords import remove_stopwords
+from preprocessing.remove_stopwords import remove_stopwords_df
 from utils.other import matrix_labels
 
 
@@ -42,9 +43,8 @@ def main():
     # Setup paths
     root = Path(__file__).resolve().parents[1]
 
-    # Read raw data for train/val to follow the standard pipeline
+    # Read raw data for training to follow the standard pipeline
     train_path = root / "data" / "raw" / "train.csv"
-    val_path = root / "data" / "raw" / "val.csv"
 
     print("=" * 80)
     print(f"TRAINING {args.model.upper()} MODEL".center(80))
@@ -53,13 +53,11 @@ def main():
     # Load data
     print("\n1. LOANDING DATA...")
     df_train = pd.read_csv(train_path, encoding="utf-8")
-    df_val = pd.read_csv(val_path, encoding="utf-8")
-    print(f"\tTrain size: {len(df_train)}\n\tVal size: {len(df_val)}")
+    print(f"\tTrain size: {len(df_train)}")
 
     # Transform labels
     print("\n2. TRANSFORMING LABELS TO BINARY MATRIX...")
     matrix_labels_train, mlb_train = matrix_labels(df_train[["label"]])
-    matrix_labels_val, mlb_val = matrix_labels(df_val[["label"]])
     print(f"\tNumber of labels: {len(mlb_train.classes_)}")
     print(f"\tLabels: {list(mlb_train.classes_)}")
 
@@ -67,34 +65,27 @@ def main():
     X_train = df_train[["comment"]].copy()
     y_train = matrix_labels_train
 
-    X_val = df_val[["comment"]].copy()
-    y_val = matrix_labels_val
-
     # 2.1 Preprocess text: clean -> tokenize -> remove stopwords
     print("\n2.1 PREPROCESSING TEXT...")
 
-    def preprocess_series(s):
-        return (
-            s.astype(str)
-            .map(vn_text_clean)
-            .map(lambda t: vn_word_tokenize(t, method="underthesea"))
-            .map(remove_stopwords)
-        )
-
-    X_train["comment"] = preprocess_series(X_train["comment"])
-    X_val["comment"] = preprocess_series(X_val["comment"])
-
+    # Clean and tokenize first, then apply stopword removal via DataFrame util
+    X_train["comment"] = (
+        X_train["comment"]
+        .astype(str)
+        .map(vn_text_clean)
+        .map(lambda t: vn_word_tokenize(t, method="underthesea"))
+    )
+    X_train = remove_stopwords_df(X_train, text_col="comment")
     # Vectorize
     print("\n3. VECTORIZING TEXT WITH TF-IDF...")
     vec = build_tfidf_vectorizer()
     X_train_vec = vec.fit_transform(X_train["comment"])
-    X_val_vec = vec.transform(X_val["comment"])
     print(f"\tTrain shape: {X_train_vec.shape}")
-    print(f"\tVal shape: {X_val_vec.shape}")
     print(f"\tVocabulary size: {len(vec.get_feature_names_out())}")
 
     # Initialize and train model
     print(f"\n4. TRAINING {args.model.upper()} MODEL...")
+
     if args.model == "svm":
         model = SVMModel(config_path=args.config)
     # elif args.model == "logistic":
@@ -106,12 +97,6 @@ def main():
 
     model.fit(X_train_vec, y_train, verbose=True)
 
-    # Evaluate
-    print("\n5. EVALUATING ON VALIDATION SET...")
-    metrics = model.evaluate(
-        X_val_vec, y_val, label_names=y_train.columns.tolist(), verbose=True
-    )
-
     # Save model
     if args.save_path:
         save_path = args.save_path
@@ -120,7 +105,7 @@ def main():
         model_dir.mkdir(parents=True, exist_ok=True)
         save_path = str(model_dir / f"{args.model}.pkl")
 
-    print(f"\n6. SAVING MODEL TO {save_path}...")
+    print(f"\n5. SAVING MODEL TO {save_path}...")
     model.save(save_path)
 
     # Save a shared vectorizer for ML models
@@ -128,7 +113,7 @@ def main():
     shared_models_dir.mkdir(parents=True, exist_ok=True)
     vectorizer_path = shared_models_dir / "vectorizer.pkl"
 
-    print(f"\n7. SAVING VECTORIZER TO {vectorizer_path}...")
+    print(f"\n6. SAVING VECTORIZER TO {vectorizer_path}...")
     dump(vec, vectorizer_path)
 
     print("\n" + "=" * 80)
