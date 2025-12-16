@@ -65,8 +65,8 @@ def main():
     X_train = df_train[["comment"]].copy()
     y_train = matrix_labels_train
 
-    # 2.1 Preprocess text: clean -> tokenize -> remove stopwords
-    print("\n2.1 PREPROCESSING TEXT...")
+    # Preprocess text
+    print("\n3 PREPROCESSING TEXT...")
 
     # Clean and tokenize first, then apply stopword removal via DataFrame util
     X_train["comment"] = (
@@ -76,15 +76,26 @@ def main():
         .map(lambda t: vn_word_tokenize(t, method="underthesea"))
     )
     X_train = remove_stopwords_df(X_train, text_col="comment")
+    # Persist processed training data for downstream evaluation/pipelines
+    processed_dir = root / "data" / "processed"
+    processed_dir.mkdir(parents=True, exist_ok=True)
+    processed_train_path = processed_dir / "train.csv"
+
+    # Combine processed text with label matrix aligning on index
+    processed_df = pd.concat(
+        [X_train.reset_index(drop=True), y_train.reset_index(drop=True)], axis=1
+    )
+    processed_df.to_csv(processed_train_path, index=False, encoding="utf-8")
+
     # Vectorize
-    print("\n3. VECTORIZING TEXT WITH TF-IDF...")
+    print("\n4. VECTORIZING TEXT WITH TF-IDF...")
     vec = build_tfidf_vectorizer()
     X_train_vec = vec.fit_transform(X_train["comment"])
     print(f"\tTrain shape: {X_train_vec.shape}")
     print(f"\tVocabulary size: {len(vec.get_feature_names_out())}")
 
     # Initialize and train model
-    print(f"\n4. TRAINING {args.model.upper()} MODEL...")
+    print(f"\n5. TRAINING {args.model.upper()} MODEL...")
 
     if args.model == "svm":
         model = SVMModel(config_path=args.config)
@@ -105,7 +116,7 @@ def main():
         model_dir.mkdir(parents=True, exist_ok=True)
         save_path = str(model_dir / f"{args.model}.pkl")
 
-    print(f"\n5. SAVING MODEL TO {save_path}...")
+    print(f"\n6. SAVING MODEL TO {save_path}...")
     model.save(save_path)
 
     # Save a shared vectorizer for ML models
@@ -113,7 +124,7 @@ def main():
     shared_models_dir.mkdir(parents=True, exist_ok=True)
     vectorizer_path = shared_models_dir / "vectorizer.pkl"
 
-    print(f"\n6. SAVING VECTORIZER TO {vectorizer_path}...")
+    print(f"\n7. SAVING VECTORIZER TO {vectorizer_path}...")
     dump(vec, vectorizer_path)
 
     print("\n" + "=" * 80)
