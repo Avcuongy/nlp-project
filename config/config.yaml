@@ -33,28 +33,22 @@ dataset:
   # Label spaces
   aspects:
     - key: brand
-      description: Nhận diện thương hiệu
     - key: exterior
-      description: Thiết kế bên ngoài (ngoại thất), Kiểu dáng, Các chi tiết bên ngoài
     - key: interior
-      description: Nội thất của xe, Không gian bên trong
     - key: performance
-      description: Vận hành (Động cơ, chạy êm, hộp số, vô lăng, phanh, chân ga, ...)
     - key: features
-      description: Tính năng, trang bị, công nghệ
     - key: cost
-      description: Chi phí (giá bán, chi phí, tiết kiệm nhiên liệu, đáng tiền, sửa chữa, ...)
 
   polarities: [positive, negative, neutral]
 
-  # Structured metadata per record (if present in CSV or auxiliary files)
+  # Structured metadata per record
   schema:
     brand: str # Thương hiệu
     model: str # Tên mẫu xe
     version: str # Phiên bản của mẫu xe
     year: str # Năm sản xuất
     comment: str # Nội dung bình luận đánh giá
-    segment: str # Phân khúc loại xe (categorical)
+    segment: str # Phân khúc loại xe (sedan, suv)
 
 # Experiment selector
 experiment:

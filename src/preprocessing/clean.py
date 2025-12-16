@@ -5,8 +5,6 @@ from pathlib import Path
 import re
 import unicodedata
 
-from utils.common import load_json
-
 
 @lru_cache(maxsize=1)
 def load_abbrev(path: str | None = None) -> dict[str, str]:

@@ -2,14 +2,15 @@ import argparse
 from pathlib import Path
 
 import pandas as pd
+from joblib import dump
 
-from src.model.svm import SVMModel
-from src.preprocessing.vectorize import build_tfidf_vectorizer
-from src.utils.other import matrix_labels
+from model.svm import SVMModel
+from preprocessing.vectorize import build_tfidf_vectorizer
+from utils.other import matrix_labels
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Train ML models for ABSA")
+    parser = argparse.ArgumentParser(description="Train ML model")
     parser.add_argument(
         "--model",
         type=str,
@@ -38,17 +39,17 @@ def main():
     val_path = root / "data" / "processed" / "val.csv"
 
     print("=" * 80)
-    print(f"Training {args.model.upper()} Model")
+    print(f"TRAINING {args.model.upper()} MODEL".center(80))
     print("=" * 80)
 
     # Load data
-    print("\n1. Loading data...")
+    print("\n1. LOANDING DATA...")
     df_train = pd.read_csv(train_path, encoding="utf-8")
     df_val = pd.read_csv(val_path, encoding="utf-8")
-    print(f"   Train size: {len(df_train)}, Val size: {len(df_val)}")
+    print(f"\tTrain size: {len(df_train)}\n\tVal size: {len(df_val)}")
 
     # Transform labels
-    print("\n2. Transforming labels to binary matrix...")
+    print("\n2. TRANSFORMING LABELS TO BINARY MATRIX...")
     matrix_labels_train, mlb_train = matrix_labels(df_train[["label"]])
     matrix_labels_val, mlb_val = matrix_labels(df_val[["label"]])
     print(f"\tNumber of labels: {len(mlb_train.classes_)}")
@@ -61,7 +62,7 @@ def main():
     X_val = df_val[["comment"]]
     y_val = matrix_labels_val
 
-    # Vectorize text
+    # Vectorize
     print("\n3. Vectorizing text with TF-IDF...")
     vec = build_tfidf_vectorizer()
     X_train_vec = vec.fit_transform(X_train["comment"])
@@ -71,7 +72,7 @@ def main():
     print(f"\tVocabulary size: {len(vec.get_feature_names_out())}")
 
     # Initialize and train model
-    print(f"\n4. Training {args.model.upper()} model...")
+    print(f"\n4. TRAINING {args.model.upper()} MODEL...")
     if args.model == "svm":
         model = SVMModel(config_path=args.config)
     # elif args.model == "logistic":
@@ -84,7 +85,7 @@ def main():
     model.fit(X_train_vec, y_train, verbose=True)
 
     # Evaluate
-    print("\n5. Evaluating on validation set...")
+    print("\n5. EVALUATING ON VALIDATION SET...")
     metrics = model.evaluate(
         X_val_vec, y_val, label_names=y_train.columns.tolist(), verbose=True
     )
@@ -95,13 +96,21 @@ def main():
     else:
         model_dir = root / "models" / "ml"
         model_dir.mkdir(parents=True, exist_ok=True)
-        save_path = str(model_dir / f"{args.model}_model.pkl")
+        save_path = str(model_dir / f"{args.model}.pkl")
 
-    print(f"\n6. Saving model to {save_path}...")
+    print(f"\n6. SAVING MODEL TO {save_path}...")
     model.save(save_path)
 
+    # Save a shared vectorizer for ML models
+    shared_models_dir = root / "models"
+    shared_models_dir.mkdir(parents=True, exist_ok=True)
+    vectorizer_path = shared_models_dir / "vectorizer.pkl"
+
+    print(f"\n7. SAVING VECTORIZER TO {vectorizer_path}...")
+    dump(vec, vectorizer_path)
+
     print("\n" + "=" * 80)
-    print("Training completed successfully")
+    print("TRAINING COMPLETED SUCCESSFULLY".center(80))
     print("=" * 80)
 
 

@@ -11,8 +11,8 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.svm import SVC
 
-from src.utils.config_loader import load_config
-from src.utils.metrics import get_scorer, evaluate
+from utils.config_loader import load_config
+from utils.metrics import get_scorer, evaluate
 
 
 class SVMModel:
