@@ -3,13 +3,17 @@ import json
 from pathlib import Path
 
 import joblib
+import numpy as np
 import pandas as pd
+import warnings
+
+warnings.filterwarnings("ignore")
+
+from sklearn.preprocessing import LabelEncoder
 
 from preprocessing.clean import vn_text_clean
 from preprocessing.tokenize import vn_word_tokenize
-from preprocessing.remove_stopwords import remove_stopwords_df
-from utils.other import parse_label, matrix_labels
-from sklearn.preprocessing import MultiLabelBinarizer
+from preprocessing.remove_stopwords import remove_stopwords_wrapper
 from utils.metrics import evaluate as eval_metrics
 from model.svm import SVMModel
 
@@ -22,7 +26,7 @@ def preprocess_df(df: pd.DataFrame, text_col: str = "comment") -> pd.DataFrame:
         .map(vn_text_clean)
         .map(lambda t: vn_word_tokenize(t, method="underthesea"))
     )
-    out = remove_stopwords_df(out, text_col=text_col)
+    out = remove_stopwords_wrapper(out, text_col=text_col)
     return out
 
 
@@ -126,39 +130,48 @@ def main():
     print(f"\n2. LOADING MODEL FROM {model_path}...")
     model = load_model(args.model, model_path)
 
-    # Resolve label classes
+    # Resolve label classes (prefer labels.json saved during training)
     print("\n3. RESOLVING LABEL CLASSES...")
-    if getattr(model, "classes_", None):
-        train_classes = list(model.classes_)
-        print(f"\tUsing classes from model: {len(train_classes)}")
-    elif labels_path.exists():
+    if labels_path.exists():
         with open(labels_path, "r", encoding="utf-8") as f:
             train_classes = json.load(f)
         print(f"\tUsing classes from labels.json: {len(train_classes)}")
     else:
-        print("\tWARNING: No stored classes; inferring from eval data (may misalign)")
-        all_labels = df["label"].astype(str).map(parse_label)
-        mlb_tmp = MultiLabelBinarizer()
-        mlb_tmp.fit(all_labels)
-        train_classes = list(mlb_tmp.classes_)
+        # Fallback to unique labels in eval data (alphabetical)
+        print("\tWARNING: labels.json not found; inferring classes from eval data")
+        train_classes = sorted(df["label"].astype(str).unique().tolist())
+        # Persist inferred classes for consistency across runs
+        try:
+            labels_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(labels_path, "w", encoding="utf-8") as f:
+                json.dump(train_classes, f, ensure_ascii=False, indent=2)
+            print(f"\tSaved inferred classes to {labels_path}")
+        except Exception as e:
+            print(f"\tCould not save inferred classes: {e}")
 
-    # Prepare y_true using matrix_labels() and align columns to training classes
-    print("\n4. PREPARING LABELS MATRIX (multi-label)...")
-    y_true_df, _mlb_val = matrix_labels(df[["label"]])
-    # Ensure all training classes exist as columns; fill missing with zeros
-    for cls in train_classes:
-        if cls not in y_true_df.columns:
-            y_true_df[cls] = 0
-    # Align column order
-    y_true_df = y_true_df[train_classes]
-    y_true = y_true_df.values
+    # Prepare y_true as integer-encoded labels in the saved class order
+    print("\n4. PREPARING GROUND TRUTH LABELS (single-label multiclass)...")
+    le = LabelEncoder()
+    le.classes_ = np.array(train_classes)
+    y_true = le.transform(df["label"].astype(str))
+
+    # Determine text column name
+    if "comment" in df.columns:
+        text_col = "comment"
+    elif "text" in df.columns:
+        text_col = "text"
+    else:
+        raise KeyError(
+            "Input CSV must contain a text column named 'comment' or 'text'. "
+            f"Found columns: {list(df.columns)}"
+        )
 
     # Preprocess text (skip if already preprocessed)
     print("\n5. PREPROCESSING TEXT...")
     if args.preprocessed:
-        X = df[["comment"]].copy()
+        X = df[[text_col]].copy()
     else:
-        X = preprocess_df(df[["comment"]], text_col="comment")
+        X = preprocess_df(df[[text_col]], text_col=text_col)
 
     # Load vectorizer
     print(f"\n6. LOADING VECTORIZER FROM {vectorizer_path}...")
@@ -166,7 +179,7 @@ def main():
 
     # Vectorize
     print("\n7. VECTORIZE...")
-    X_vec = vec.transform(X["comment"])
+    X_vec = vec.transform(X[text_col])
     print(f"\tEval shape: {X_vec.shape}")
 
     # Predict

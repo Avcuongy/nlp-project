@@ -62,7 +62,7 @@ def remove_stopwords(text: str) -> str:
     return " ".join(kept).strip()
 
 
-def remove_stopwords_df(
+def remove_stopwords_wrapper(
     df: pd.DataFrame,
     text_col: str = "text",
 ) -> pd.DataFrame:
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     print(remove_stopwords(sample))
     print(remove_stopwords(" ".join(sample.split())))
     print(
-        remove_stopwords_df(
+        remove_stopwords_wrapper(
             pd.DataFrame(
                 {
                     "text": [

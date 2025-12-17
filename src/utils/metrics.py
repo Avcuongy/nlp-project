@@ -14,64 +14,59 @@ from sklearn.metrics import (
     recall_score,
     roc_auc_score,
 )
-from sklearn.metrics import make_scorer
 
 
-def get_scorer(scoring: str):
+def _to_1d_labels(arr: Any) -> np.ndarray:
+    """Convert labels to a 1D integer/string array.
+
+    Supports:
+    - Pandas DataFrame/Series
+    - One-hot matrices (argmax)
+    - Probability matrices (argmax)
+    - Already 1D arrays
     """
-    Return a sklearn-compatible scorer based on a scoring string.
-    Falls back to the string for built-in scorer names.
+    if isinstance(arr, pd.DataFrame):
+        # If single column, squeeze; if multi-column, treat as matrix
+        if arr.shape[1] == 1:
+            return arr.iloc[:, 0].to_numpy()
+        arr = arr.to_numpy()
+    if isinstance(arr, pd.Series):
+        return arr.to_numpy()
 
-    Args:
-        scoring (str): Scoring metric name.
-
-    Returns:
-        scorer or str: sklearn scorer object or original string.
-    """
-    # For common customizations we could construct scorers explicitly
-    mapping = {
-        "f1_macro": make_scorer(f1_score, average="macro"),
-        "f1_micro": make_scorer(f1_score, average="micro"),
-        "f1_weighted": make_scorer(f1_score, average="weighted"),
-    }
-    return mapping.get(scoring, scoring)
+    a = np.asarray(arr)
+    if a.ndim == 2:
+        # Heuristics: one-hot/probabilities -> argmax
+        with np.errstate(invalid="ignore"):
+            row_sums = a.sum(axis=1)
+        if np.all((a >= 0) & (a <= 1)) and (
+            np.allclose(row_sums, 1, atol=1e-5) or np.all(np.isin(a, [0, 1]))
+        ):
+            return a.argmax(axis=1)
+    return a
 
 
 def evaluate(
-    y_true,
-    y_pred,
+    y_true: Any,
+    y_pred: Any,
     label_names: Optional[list[str]] = None,
     verbose: bool = True,
 ) -> Dict[str, float]:
-    """Compute standard multilabel metrics and optionally print report.
+    """Evaluate single-label multiclass predictions.
 
     Args:
-        y_true: Ground-truth labels (ndarray or DataFrame of binary matrix).
-        y_pred: Predicted labels (ndarray or DataFrame of binary matrix).
-        label_names (list[str] | None): Class names for classification report.
-        verbose (bool): If True, print summary metrics and report.
+        y_true: Ground-truth labels (1D array-like, or 2D one-hot/proba).
+        y_pred: Predicted labels (1D array-like, or 2D one-hot/proba).
+        label_names: Class names for classification report (ordered to match encodings).
+        verbose: If True, print summary metrics and report.
 
     Returns:
-        Dict[str, float]: precision/recall/f1 for micro and macro averages.
+        Dict[str, float]: accuracy and macro-averaged precision/recall/f1.
     """
-    if isinstance(y_true, pd.DataFrame):
-        y_true_arr = y_true.values
-    else:
-        y_true_arr = y_true
-
-    if isinstance(y_pred, pd.DataFrame):
-        y_pred_arr = y_pred.values
-    else:
-        y_pred_arr = y_pred
+    y_true_arr = _to_1d_labels(y_true)
+    y_pred_arr = _to_1d_labels(y_pred)
 
     metrics: Dict[str, float] = {
-        "precision_micro": precision_score(
-            y_true_arr, y_pred_arr, average="micro", zero_division=0
-        ),
-        "recall_micro": recall_score(
-            y_true_arr, y_pred_arr, average="micro", zero_division=0
-        ),
-        "f1_micro": f1_score(y_true_arr, y_pred_arr, average="micro", zero_division=0),
+        "accuracy_score": accuracy_score(y_true_arr, y_pred_arr),
         "precision_macro": precision_score(
             y_true_arr, y_pred_arr, average="macro", zero_division=0
         ),
@@ -86,12 +81,33 @@ def evaluate(
         print(
             pd.DataFrame.from_dict(metrics, orient="index", columns=["score"]).round(4)
         )
-        if label_names is not None:
-            print("\nClassification Report:")
-            print(
-                classification_report(
-                    y_true_arr, y_pred_arr, target_names=label_names, zero_division=0
+
+        # Print classification report if label names are provided
+        try:
+            if label_names is not None:
+                print("\nClassification Report:")
+                print(
+                    classification_report(
+                        y_true_arr,
+                        y_pred_arr,
+                        target_names=label_names,
+                        zero_division=0,
+                    )
                 )
+        except Exception:
+            # Fallback without target_names if a mismatch occurs
+            print("\nClassification Report:")
+            print(classification_report(y_true_arr, y_pred_arr, zero_division=0))
+
+        # Also display confusion matrix
+        try:
+            cm = confusion_matrix(y_true_arr, y_pred_arr)
+            cm_df = pd.DataFrame(
+                cm, index=label_names or None, columns=label_names or None
             )
+            print("\nConfusion Matrix:")
+            print(cm_df)
+        except Exception:
+            pass
 
     return metrics

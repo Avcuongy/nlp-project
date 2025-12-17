@@ -12,8 +12,8 @@ from model.svm import SVMModel
 from preprocessing.vectorize import build_tfidf_vectorizer
 from preprocessing.clean import vn_text_clean
 from preprocessing.tokenize import vn_word_tokenize
-from preprocessing.remove_stopwords import remove_stopwords_df
-from utils.other import matrix_labels
+from preprocessing.remove_stopwords import remove_stopwords_wrapper
+from sklearn.preprocessing import LabelEncoder
 
 
 def main():
@@ -56,14 +56,14 @@ def main():
     print(f"\tTrain size: {len(df_train)}")
 
     # Transform labels
-    print("\n2. TRANSFORMING LABELS TO BINARY MATRIX...")
-    matrix_labels_train, mlb_train = matrix_labels(df_train[["label"]])
-    print(f"\tNumber of labels: {len(mlb_train.classes_)}")
-    print(f"\tLabels: {list(mlb_train.classes_)}")
+    print("\n2. ENCODING SINGLE LABEL COLUMN...")
+    labels_str = df_train["label"].astype(str)
+    le = LabelEncoder()
+    y_train = le.fit_transform(labels_str)
+    print(f"\tClasses: {list(le.classes_)}")
 
     # Prepare train/val splits
     X_train = df_train[["comment"]].copy()
-    y_train = matrix_labels_train
 
     # Preprocess text
     print("\n3 PREPROCESSING TEXT...")
@@ -75,15 +75,18 @@ def main():
         .map(vn_text_clean)
         .map(lambda t: vn_word_tokenize(t, method="underthesea"))
     )
-    X_train = remove_stopwords_df(X_train, text_col="comment")
+    X_train = remove_stopwords_wrapper(X_train, text_col="comment")
     # Persist processed training data for downstream evaluation/pipelines
     processed_dir = root / "data" / "processed"
     processed_dir.mkdir(parents=True, exist_ok=True)
     processed_train_path = processed_dir / "train.csv"
 
-    # Combine processed text with label matrix aligning on index
-    processed_df = pd.concat(
-        [X_train.reset_index(drop=True), y_train.reset_index(drop=True)], axis=1
+    # Combine processed text with original string label for downstream use
+    processed_df = pd.DataFrame(
+        {
+            "comment": X_train["comment"].reset_index(drop=True),
+            "label": labels_str.reset_index(drop=True),
+        }
     )
     processed_df.to_csv(processed_train_path, index=False, encoding="utf-8")
 
@@ -126,6 +129,12 @@ def main():
 
     print(f"\n7. SAVING VECTORIZER TO {vectorizer_path}...")
     dump(vec, vectorizer_path)
+
+    # Save label classes for consistent evaluation
+    labels_json_path = shared_models_dir / "labels.json"
+    with open(labels_json_path, "w", encoding="utf-8") as f:
+        json.dump(list(le.classes_), f, ensure_ascii=False, indent=2)
+    print(f"\n8. SAVING LABEL CLASSES TO {labels_json_path}...")
 
     print("\n" + "=" * 80)
     print("TRAINING COMPLETED SUCCESSFULLY".center(80))

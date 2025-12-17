@@ -6,23 +6,21 @@ from typing import Any, Dict, Optional, Tuple
 import joblib
 import numpy as np
 import pandas as pd
-from sklearn.metrics import classification_report, f1_score, make_scorer
 from sklearn.model_selection import GridSearchCV
-from sklearn.multiclass import OneVsRestClassifier
 from sklearn.svm import SVC
 
 from utils.config_loader import load_config
-from utils.metrics import get_scorer, evaluate
+from utils.metrics import evaluate
 
 
 class SVMModel:
-    """SVM Model with OneVsRestClassifier for multi-label ABSA.
+    """SVM classifier for single-label multiclass classification.
 
     Attributes:
         config (dict): Configuration dictionary loaded from YAML.
-        model (OneVsRestClassifier): The underlying SVM classifier.
+        model (SVC): The underlying SVM classifier.
         grid_search (GridSearchCV): GridSearchCV instance for hyperparameter tuning.
-        best_estimator_ (OneVsRestClassifier): Best model from grid search.
+        best_estimator_ (SVC): Best model from grid search.
         is_fitted (bool): Whether the model has been fitted.
     """
 
@@ -38,18 +36,18 @@ class SVMModel:
             config_path = str(root / "config" / "ml" / "svm.yaml")
 
         self.config = load_config(config_path)
-        self.model: Optional[OneVsRestClassifier] = None
+        self.model: Optional[SVC] = None
         self.grid_search: Optional[GridSearchCV] = None
-        self.best_estimator_: Optional[OneVsRestClassifier] = None
+        self.best_estimator_: Optional[SVC] = None
         self.is_fitted = False
 
-    def _build_model(self) -> OneVsRestClassifier:
-        """Build the OneVsRestClassifier with SVC base estimator.
+    def _build_model(self) -> SVC:
+        """Build the SVC estimator.
 
         Returns:
-            OneVsRestClassifier: Initialized model.
+            SVC: Initialized model.
         """
-        return OneVsRestClassifier(SVC())
+        return SVC()
 
     def _build_param_grid(self) -> Dict[str, Any]:
         """Build parameter grid for GridSearchCV from config.
@@ -64,21 +62,22 @@ class SVMModel:
             # Convert single values to list for GridSearchCV
             if not isinstance(values, list):
                 values = [values]
-            param_grid[f"estimator__{key}"] = values
+            # Using plain SVC (no wrapper), so raw keys are used directly
+            param_grid[key] = values
 
         return param_grid
 
     def fit(
         self,
         X_train: np.ndarray | pd.DataFrame,
-        y_train: np.ndarray | pd.DataFrame,
+        y_train: np.ndarray | pd.DataFrame | pd.Series,
         verbose: bool = True,
     ) -> "SVMModel":
         """Train the SVM model with GridSearchCV.
 
         Args:
             X_train: Training features (vectorized text).
-            y_train: Training labels (binary matrix).
+            y_train: Training labels (1D array-like of class ids or names).
             verbose (bool): Whether to print training progress.
 
         Returns:
@@ -87,8 +86,10 @@ class SVMModel:
         # Convert DataFrames to arrays if needed
         if isinstance(X_train, pd.DataFrame):
             X_train = X_train.values
-        if isinstance(y_train, pd.DataFrame):
+        if isinstance(y_train, (pd.DataFrame, pd.Series)):
             y_train = y_train.values
+        # Ensure 1D label vector
+        y_train = np.ravel(y_train)
 
         # Build model and param grid
         self.model = self._build_model()
@@ -96,18 +97,15 @@ class SVMModel:
 
         # Get GridSearch config
         gs_config = self.config.get("grid_search", {})
-        scoring_name = gs_config.get("scoring", "f1_micro")
+        scoring_name = gs_config.get("scoring", "f1_macro")
         cv = gs_config.get("cv", 5)
         n_jobs = gs_config.get("n_jobs", -1)
-
-        # Build scorer
-        scorer = make_scorer(f1_score, average="micro", zero_division=0)
 
         # Initialize GridSearchCV
         self.grid_search = GridSearchCV(
             estimator=self.model,
             param_grid=param_grid,
-            scoring=scorer,
+            scoring=scoring_name,
             cv=cv,
             n_jobs=n_jobs,
             verbose=2 if verbose else 0,
@@ -127,14 +125,16 @@ class SVMModel:
             print("\nBest parameters:")
             for key, value in self.grid_search.best_params_.items():
                 print(f"  {key}: {value}")
-            print(f"\nBest CV score (f1_micro): {self.grid_search.best_score_:.4f}")
+            print(
+                f"\nBest CV score ({scoring_name}): {self.grid_search.best_score_:.4f}"
+            )
 
         return self
 
     def evaluate(
         self,
         X_test: np.ndarray | pd.DataFrame,
-        y_test: np.ndarray | pd.DataFrame,
+        y_test: np.ndarray | pd.DataFrame | pd.Series,
         label_names: Optional[list[str]] = None,
         verbose: bool = True,
     ) -> Dict[str, float]:
@@ -159,7 +159,7 @@ class SVMModel:
             X: Input features (vectorized text).
 
         Returns:
-            np.ndarray: Binary label matrix.
+            np.ndarray: 1D array of predicted class ids or names.
 
         Raises:
             ValueError: If model has not been fitted.
