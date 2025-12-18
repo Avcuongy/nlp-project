@@ -21,12 +21,12 @@ optuna:
     n_estimators:
       suggest: int # trial.suggest_int
       low: 100
-      high: 1000
+      high: 800
       step: 50
     max_depth:
       suggest: int
       low: 3
-      high: 12
+      high: 10
     learning_rate:
       suggest: float # trial.suggest_float
       low: 0.01
