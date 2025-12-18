@@ -118,10 +118,10 @@ def load_model_config(project_cfg: Mapping[str, Any]) -> Dict[str, Any]:
     """
     Resolve and load the model-specific YAML based on experiment.model_family.
     Merge project-level hints (if any) onto the model config.
-    
+
     Args:
         project_cfg (Mapping[str, Any]): Loaded project configuration.
-        
+
     Returns:
         Dict[str, Any]: Loaded and merged model configuration.
     """

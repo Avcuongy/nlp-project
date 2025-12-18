@@ -64,8 +64,8 @@ def remove_stopwords(text: str) -> str:
 
 def remove_stopwords_wrapper(
     df: pd.DataFrame,
-    text_col: str = "text",
-) -> pd.DataFrame:
+    text_col: str = "comment",
+) -> pd.Series:
     """Apply stopword removal on a DataFrame column and recover empties.
 
     Strategy: create an internal backup Series of the original text, apply
@@ -74,10 +74,10 @@ def remove_stopwords_wrapper(
 
     Args:
         df (pd.DataFrame): Input DataFrame.
-        text_col (str): Name of the text column to process. Defaults to "text".
+        text_col (str): Name of the text column to process. Defaults to "comment".
 
     Returns:
-        pd.DataFrame: Single-column DataFrame containing only the updated `text_col`.
+        pd.Series: Series containing only the updated values of `text_col`.
     """
     if text_col not in df.columns:
         raise KeyError(f"Column '{text_col}' not found in DataFrame")
@@ -102,7 +102,7 @@ def remove_stopwords_wrapper(
     if empties.any():
         out.loc[empties, text_col] = backup.loc[empties]
 
-    return out[[text_col]]
+    return out[text_col]
 
 
 if __name__ == "__main__":
@@ -121,6 +121,7 @@ if __name__ == "__main__":
                         "laptop",
                     ],
                 }
-            )
+            ),
+            text_col="text",
         )
     )
