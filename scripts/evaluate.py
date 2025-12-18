@@ -26,7 +26,7 @@ def preprocess_df(df: pd.DataFrame, text_col: str = "comment") -> pd.DataFrame:
         .map(vn_text_clean)
         .map(lambda t: vn_word_tokenize(t, method="underthesea"))
     )
-    out = remove_stopwords_wrapper(out, text_col=text_col)
+    out[text_col] = remove_stopwords_wrapper(out, text_col=text_col)
     return out
 
 

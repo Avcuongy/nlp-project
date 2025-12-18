@@ -75,7 +75,7 @@ def main():
         .map(vn_text_clean)
         .map(lambda t: vn_word_tokenize(t, method="underthesea"))
     )
-    X_train = remove_stopwords_wrapper(X_train, text_col="comment")
+    X_train["comment"] = remove_stopwords_wrapper(X_train, text_col="comment")
     # Persist processed training data for downstream evaluation/pipelines
     processed_dir = root / "data" / "processed"
     processed_dir.mkdir(parents=True, exist_ok=True)
