@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional, Tuple
 import joblib
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.svm import SVC
 
 from utils.config_loader import load_config
@@ -101,12 +101,20 @@ class SVMModel:
         cv = gs_config.get("cv", 5)
         n_jobs = gs_config.get("n_jobs", -1)
 
+        # Make CV deterministic with a seeded splitter if cv is an int
+        if isinstance(cv, int):
+            cv_splitter = StratifiedKFold(
+                n_splits=cv, shuffle=True, random_state=42
+            )
+        else:
+            cv_splitter = cv
+
         # Initialize GridSearchCV
         self.grid_search = GridSearchCV(
             estimator=self.model,
             param_grid=param_grid,
             scoring=scoring_name,
-            cv=cv,
+            cv=cv_splitter,
             n_jobs=n_jobs,
             verbose=2 if verbose else 0,
         )

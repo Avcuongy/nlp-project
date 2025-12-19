@@ -9,7 +9,10 @@ import warnings
 warnings.filterwarnings("ignore")
 
 from model.svm import SVMModel
+from model.logistic import LogisticModel
+from model.xgboost import XGBoostModel
 from sklearn.preprocessing import LabelEncoder
+from utils.common import set_seed
 
 
 def main():
@@ -35,6 +38,9 @@ def main():
     )
 
     args = parser.parse_args()
+
+    # Ensure reproducibility across runs
+    set_seed(42)
 
     # Setup paths
     root = Path(__file__).resolve().parents[1]
@@ -75,10 +81,10 @@ def main():
 
     if args.model == "svm":
         model = SVMModel(config_path=args.config)
-    # elif args.model == "logistic":
-    #     model = LogisticModel(config_path=args.config)
-    # elif args.model == "xgboost":
-    #     model = XGBoostModel(config_path=args.config)
+    elif args.model == "logistic":
+        model = LogisticModel(config_path=args.config)
+    elif args.model == "xgboost":
+        model = XGBoostModel(config_path=args.config)
     else:
         raise ValueError(f"Unsupported model: {args.model}")
 
