@@ -15,10 +15,6 @@ grid_search:
   param_grid:
     C:
       [
-        1.,
-        1.47368421,
-        1.94736842,
-        2.42105263,
         2.89473684,
         3.36842105,
         3.84210526,
@@ -32,11 +28,7 @@ grid_search:
         7.63157895,
         8.10526316,
         8.57894737,
-        9.05263158,
-        9.52631579,
-        10.,
       ]
     penalty: ["l1", "l2", "elasticnet"]
-    solver:
-      ["lbfgs", "liblinear", "newton-cg", "newton-cholesky", "sag", "saga"]
+    solver: ["lbfgs", "liblinear", "newton-cholesky", "sag"]
     class_weight: [null, "balanced"]
