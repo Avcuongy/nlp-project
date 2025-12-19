@@ -112,7 +112,7 @@ def main():
         "--test",
         type=str,
         default=None,
-        help="Path to test data (optional)",
+        help="Path to test data (default: data/raw/test.csv)",
     )
     parser.add_argument(
         "--output-dir",
@@ -134,6 +134,7 @@ def main():
 
     train_path = args.train or str(root / "data" / "raw" / "train.csv")
     val_path = args.val or str(root / "data" / "raw" / "val.csv")
+    test_path = args.test or str(root / "data" / "raw" / "test.csv")
     output_dir = args.output_dir or str(root / "data" / "processed")
 
     # Preprocess train
@@ -151,12 +152,11 @@ def main():
     )
 
     # Preprocess test
-    if args.test:
-        preprocess_and_save(
-            args.test,
-            str(Path(output_dir) / "test.csv"),
-            text_col=args.text_col,
-        )
+    preprocess_and_save(
+        test_path,
+        str(Path(output_dir) / "test.csv"),
+        text_col=args.text_col,
+    )
 
     # Fit and save label encoder
     print("\n" + "=" * 80)
