@@ -1,5 +1,4 @@
 import argparse
-import json
 from pathlib import Path
 from joblib import load
 
@@ -58,12 +57,16 @@ def main():
     df_train = pd.read_csv(train_path, encoding="utf-8")
     print(f"\tTrain size: {len(df_train)}")
 
-    # Transform labels
-    print("\n2. ENCODING LABELS...")
-    labels_str = df_train["label"].astype(str)
-    le = LabelEncoder()
-    y_train = le.fit_transform(labels_str)
+    # Load label encoder
+    print("\n2. LOADING LABEL ENCODER...")
+    label_encoder_path = root / "models" / "label_encoder.pkl"
+    le = load(label_encoder_path)
+    print(f"\tLoaded from {label_encoder_path}")
     print(f"\tClasses: {list(le.classes_)}")
+
+    # Transform labels
+    labels_str = df_train["label"].astype(str)
+    y_train = le.transform(labels_str)
 
     # Load vectorizer
     print("\n3. LOADING VECTORIZER...")
@@ -100,13 +103,6 @@ def main():
 
     print(f"\n6. SAVING MODEL TO {save_path}...")
     model.save(save_path)
-
-    # Save label classes for consistent evaluation
-    shared_models_dir = root / "models"
-    labels_json_path = shared_models_dir / "labels.json"
-    with open(labels_json_path, "w", encoding="utf-8") as f:
-        json.dump(list(le.classes_), f, ensure_ascii=False, indent=2)
-    print(f"\n7. SAVING LABEL CLASSES TO {labels_json_path}...")
 
     print("\n" + "=" * 80)
     print("TRAINING COMPLETED SUCCESSFULLY".center(80))

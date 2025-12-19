@@ -9,9 +9,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-from sklearn.preprocessing import LabelEncoder
-
-from scripts.preprocessing import preprocessing_df
+from scripts.preprocess import preprocessing_df
 from utils.metrics import evaluate as eval_metrics
 from model.svm import SVMModel
 
@@ -70,10 +68,10 @@ def main():
         help="Path to CSV data for evaluation (defaults to data/processed/val.csv)",
     )
     parser.add_argument(
-        "--labels-path",
+        "--label-encoder-path",
         type=str,
         default=None,
-        help="Path to saved label classes JSON (defaults to models/labels.json)",
+        help="Path to saved label encoder .pkl (defaults to models/label_encoder.pkl)",
     )
     parser.add_argument(
         "--preprocessed",
@@ -99,8 +97,10 @@ def main():
         if args.data_path
         else root / "data" / "processed" / "val.csv"
     )
-    labels_path = (
-        Path(args.labels_path) if args.labels_path else root / "models" / "labels.json"
+    label_encoder_path = (
+        Path(args.label_encoder_path)
+        if args.label_encoder_path
+        else root / "models" / "label_encoder.pkl"
     )
 
     print("=" * 80)
@@ -116,30 +116,22 @@ def main():
     print(f"\n2. LOADING MODEL FROM {model_path}...")
     model = load_model(args.model, model_path)
 
-    # Resolve label classes (prefer labels.json saved during training)
-    print("\n3. RESOLVING LABEL CLASSES...")
-    if labels_path.exists():
-        with open(labels_path, "r", encoding="utf-8") as f:
-            train_classes = json.load(f)
-        print(f"\tUsing classes from labels.json: {len(train_classes)}")
+    # Load label encoder
+    print("\n3. LOADING LABEL ENCODER...")
+    if label_encoder_path.exists():
+        le = joblib.load(label_encoder_path)
+        print(f"\tLoaded from {label_encoder_path}")
+        print(f"\tClasses: {list(le.classes_)}")
     else:
-        # Fallback to unique labels in eval data (alphabetical)
-        print("\tWARNING: labels.json not found; inferring classes from eval data")
-        train_classes = sorted(df["label"].astype(str).unique().tolist())
-        # Persist inferred classes for consistency across runs
-        try:
-            labels_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(labels_path, "w", encoding="utf-8") as f:
-                json.dump(train_classes, f, ensure_ascii=False, indent=2)
-            print(f"\tSaved inferred classes to {labels_path}")
-        except Exception as e:
-            print(f"\tCould not save inferred classes: {e}")
+        raise FileNotFoundError(
+            f"Label encoder not found at {label_encoder_path}. "
+            "Please run preprocess.py first to generate label_encoder.pkl"
+        )
 
-    # Prepare y_true as integer-encoded labels in the saved class order
-    print("\n4. PREPARING GROUND TRUTH LABELS (single-label multiclass)...")
-    le = LabelEncoder()
-    le.classes_ = np.array(train_classes)
+    # Prepare y_true as integer-encoded labels
+    print("\n4. PREPARING TRUTH LABELS...")
     y_true = le.transform(df["label"].astype(str))
+    print(f"\tEncoded {len(y_true)} labels")
 
     # Determine text column name
     if "comment" in df.columns:
@@ -176,7 +168,7 @@ def main():
     # Evaluate
     print("\n9. EVALUATING...")
     metrics = eval_metrics(
-        y_true=y_true, y_pred=y_pred, label_names=train_classes, verbose=True
+        y_true=y_true, y_pred=y_pred, label_names=list(le.classes_), verbose=True
     )
 
     print("\n" + "=" * 80)

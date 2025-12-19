@@ -1,6 +1,12 @@
 import numpy as np
 import pandas as pd
 from pathlib import Path
+from joblib import dump
+import warnings
+
+warnings.filterwarnings("ignore")
+
+from sklearn.preprocessing import LabelEncoder
 
 from preprocessing.clean import vn_text_clean
 from preprocessing.tokenize import vn_word_tokenize
@@ -20,8 +26,6 @@ def preprocessing_df(df: pd.DataFrame, text_col: str = "comment") -> pd.DataFram
         DataFrame with preprocessed text
     """
     df = df.copy()
-
-    print(f"Preprocessing for column: {text_col}")
 
     # Step 1: Clean text
     print("\tStep 1: Cleaning text...")
@@ -48,7 +52,6 @@ def preprocessing_df(df: pd.DataFrame, text_col: str = "comment") -> pd.DataFram
     # Remove backup column
     df.drop(columns=["text_backup"], inplace=True)
 
-    print("\tStep 4: Preprocessing completed")
     return df
 
 
@@ -84,7 +87,6 @@ def preprocess_and_save(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(output_path, index=False, encoding="utf-8")
     print(f"\nSaved processed data to {output_path}")
-    print(f"{'='*80}\n")
 
 
 def main():
@@ -148,13 +150,34 @@ def main():
         text_col=args.text_col,
     )
 
-    # Preprocess test if provided
+    # Preprocess test
     if args.test:
         preprocess_and_save(
             args.test,
             str(Path(output_dir) / "test.csv"),
             text_col=args.text_col,
         )
+
+    # Fit and save label encoder
+    print("\n" + "=" * 80)
+    print("Fitting and saving label encoder".center(80))
+    print("=" * 80)
+
+    # Load train data to fit label encoder
+    train_processed = pd.read_csv(Path(output_dir) / "train.csv")
+    le = LabelEncoder()
+    le.fit(train_processed["label"].astype(str))
+
+    # Save label encoder
+    models_dir = root / "models"
+    models_dir.mkdir(parents=True, exist_ok=True)
+    label_encoder_path = models_dir / "label_encoder.pkl"
+    dump(le, label_encoder_path)
+
+    print(
+        f"\nFitted label encoder with {len(le.classes_)} classes: {list(le.classes_)}"
+    )
+    print(f"Saved label encoder to {label_encoder_path}")
 
     print("\n" + "=" * 80)
     print("PREPROCESSING COMPLETED SUCCESSFULLY".center(80))
