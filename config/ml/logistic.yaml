@@ -13,7 +13,8 @@ grid_search:
 
   # Hyperparameter grid
   param_grid:
-    C: [0.01, 0.1, 1.0, 10.0, 100.0]
-    penalty: ["l2"]
-    solver: ["liblinear", "lbfgs"]
+    C: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    penalty: ["l1", "l2", "elasticnet"]
+    solver:
+      ["lbfgs", "liblinear", "newton-cg", "newton-cholesky", "sag", "saga"]
     class_weight: [null, "balanced"]

@@ -11,23 +11,9 @@ warnings.filterwarnings("ignore")
 
 from sklearn.preprocessing import LabelEncoder
 
-from preprocessing.clean import vn_text_clean
-from preprocessing.tokenize import vn_word_tokenize
-from preprocessing.remove_stopwords import remove_stopwords_wrapper
+from scripts.preprocessing import preprocessing_df
 from utils.metrics import evaluate as eval_metrics
 from model.svm import SVMModel
-
-
-def preprocess_df(df: pd.DataFrame, text_col: str = "comment") -> pd.DataFrame:
-    out = df.copy()
-    out[text_col] = (
-        out[text_col]
-        .astype(str)
-        .map(vn_text_clean)
-        .map(lambda t: vn_word_tokenize(t, method="underthesea"))
-    )
-    out[text_col] = remove_stopwords_wrapper(out, text_col=text_col)
-    return out
 
 
 def load_model(model_name: str, model_path: Path):
@@ -169,9 +155,10 @@ def main():
     # Preprocess text (skip if already preprocessed)
     print("\n5. PREPROCESSING TEXT...")
     if args.preprocessed:
+        print("\tSkipping preprocessing (data already preprocessed)")
         X = df[[text_col]].copy()
     else:
-        X = preprocess_df(df[[text_col]], text_col=text_col)
+        X = preprocessing_df(df[[text_col]], text_col=text_col)
 
     # Load vectorizer
     print(f"\n6. LOADING VECTORIZER FROM {vectorizer_path}...")
