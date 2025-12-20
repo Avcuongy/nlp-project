@@ -5,7 +5,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 def build_tfidf_vectorizer(
     analyzer: str = "char",
-    min_df: int = 3,
+    min_df: int = 2,
     max_df: float = 0.95,
     ngram_range: Tuple[int, int] = (3, 5),
     sublinear_tf: bool = True,
