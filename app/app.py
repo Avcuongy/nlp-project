@@ -3,15 +3,19 @@ import numpy as np
 import pandas as pd
 from joblib import load
 import os
+import sys
 from pathlib import Path
 from tensorflow import keras
+
+# Get project root directory
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+# Add src to path
+sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from preprocessing.clean import vn_text_clean
 from preprocessing.tokenize import vn_word_tokenize
 from preprocessing.remove_stopwords import remove_stopwords
-
-# Get project root directory
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
 # Load vectorizer và label encoder
