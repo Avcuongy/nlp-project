@@ -1,22 +1,27 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-import pickle
+from joblib import load
 import os
+from pathlib import Path
 from tensorflow import keras
 
 from preprocessing.clean import vn_text_clean
 from preprocessing.tokenize import vn_word_tokenize
 from preprocessing.remove_stopwords import remove_stopwords
 
+# Get project root directory
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
 
 # Load vectorizer và label encoder
 @st.cache_resource
 def load_vectorizer_and_encoder():
-    with open("../models/vectorizer.pkl", "rb") as f:
-        vectorizer = pickle.load(f)
-    with open("../models/label_encoder.pkl", "rb") as f:
-        label_encoder = pickle.load(f)
+    vectorizer_path = PROJECT_ROOT / "models" / "vectorizer.pkl"
+    label_encoder_path = PROJECT_ROOT / "models" / "label_encoder.pkl"
+
+    vectorizer = load(vectorizer_path)
+    label_encoder = load(label_encoder_path)
     return vectorizer, label_encoder
 
 
@@ -28,14 +33,13 @@ def load_models():
     # Load ML models
     ml_models = ["svm", "logistic", "xgboost"]
     for model_name in ml_models:
-        model_path = f"../models/ml/{model_name}.pkl"
-        if os.path.exists(model_path):
-            with open(model_path, "rb") as f:
-                models[model_name] = pickle.load(f)
+        model_path = PROJECT_ROOT / "models" / "ml" / f"{model_name}.pkl"
+        if model_path.exists():
+            models[model_name] = load(model_path)
 
     # Load DL model
-    dl_model_path = "../models/dl/fnn.keras"
-    if os.path.exists(dl_model_path):
+    dl_model_path = PROJECT_ROOT / "models" / "dl" / "fnn.keras"
+    if dl_model_path.exists():
         models["fnn"] = keras.models.load_model(dl_model_path)
 
     return models
@@ -161,7 +165,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 
 # Ô nhập văn bản
 text_input = st.text_area(
-    "Nhập văn bản để phân tích:",
+    "Nhập văn bản:",
     height=150,
     placeholder="Ví dụ: Sản phẩm này thật tuyệt vời...",
 )
@@ -190,7 +194,7 @@ if st.button("Predict", use_container_width=True):
                         <p style='font-size: 18px; margin: 0;'>
                             <b>Text:</b> {text_input[:100]}{'...' if len(text_input) > 100 else ''}
                         </p>
-                        <p style='font-size: 20px; margin-top: 10px; color: #1f77b4;'>
+                        <p style='font-size: 20px; margin-top: 10px;'>
                             <b>Label:</b> {prediction}
                         </p>
                     </div>
