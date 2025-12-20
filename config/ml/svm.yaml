@@ -2,39 +2,8 @@
 model: svm
 type: ml
 
-# GridSearchCV
-grid_search:
-  # Cross-Validation settings
-  cv: 5
-
-  # Scoring metric
-  scoring: f1_macro
-  n_jobs: -1
-
-  # Hyperparameter grid
-  param_grid:
-    C:
-      [
-        1.,
-        1.47368421,
-        1.94736842,
-        2.42105263,
-        2.89473684,
-        3.36842105,
-        3.84210526,
-        4.31578947,
-        4.78947368,
-        5.26315789,
-        5.73684211,
-        6.21052632,
-        6.68421053,
-        7.15789474,
-        7.63157895,
-        8.10526316,
-        8.57894737,
-        9.05263158,
-        9.52631579,
-        10.,
-      ]
-    kernel: ["linear", "rbf", "poly", "sigmoid"]
-    gamma: ["scale", "auto"]
+# parameters
+parameters:
+  C: 2.8421
+  kernel: linear
+  gamma: scale

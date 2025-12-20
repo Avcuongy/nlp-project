@@ -2,33 +2,9 @@
 model: logistic
 type: ml
 
-# GridSearchCV
-grid_search:
-  # Cross-Validation settings
-  cv: 5
-
-  # Scoring metric
-  scoring: f1_macro
-  n_jobs: -1
-
-  # Hyperparameter grid
-  param_grid:
-    C:
-      [
-        2.89473684,
-        3.36842105,
-        3.84210526,
-        4.31578947,
-        4.78947368,
-        5.26315789,
-        5.73684211,
-        6.21052632,
-        6.68421053,
-        7.15789474,
-        7.63157895,
-        8.10526316,
-        8.57894737,
-      ]
-    penalty: ["l1", "l2", "elasticnet"]
-    solver: ["lbfgs", "liblinear", "newton-cholesky", "sag"]
-    class_weight: [null, "balanced"]
+# parameters
+parameters:
+  C: 8.3333
+  max_iter: 500
+  penalty: l2
+  solver: lbfgs

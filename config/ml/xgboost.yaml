@@ -2,61 +2,6 @@
 model: xgboost
 type: ml
 
-# Optuna configuration for hyperparameter optimization
-optuna:
-  study_name: "xgb_f1_macro"
-  direction: maximize # maximize f1_macro
-  n_trials: 50 # number of trials
-  timeout: null # seconds; null means no limit
-
-  sampler:
-    name: tpe # tpe | cmaes | random
-    seed: 42
-
-  pruner:
-    name: median # median | halving | hyperband | none
-
-  # Search space definition (Optuna suggest schema)
-  search_space:
-    n_estimators:
-      suggest: int # trial.suggest_int
-      low: 100
-      high: 800
-      step: 50
-    max_depth:
-      suggest: int
-      low: 3
-      high: 10
-    learning_rate:
-      suggest: float # trial.suggest_float
-      low: 0.01
-      high: 0.3
-      log: true # use log scale
-    subsample:
-      suggest: float
-      low: 0.5
-      high: 1.0
-    colsample_bytree:
-      suggest: float
-      low: 0.5
-      high: 1.0
-    gamma:
-      suggest: float
-      low: 0.0
-      high: 5.0
-    reg_alpha:
-      suggest: float
-      low: 1e-8
-      high: 1.0
-      log: true
-    reg_lambda:
-      suggest: float
-      low: 1e-8
-      high: 1.0
-      log: true
-
-  # XGBoost booster & objective
-  booster:
-    tree_method: auto # auto | hist | gpu_hist (if GPU enabled)
-    objective: multi:softprob # or binary:logistic depending on task
-
+# parameters
+parameters:
+  none

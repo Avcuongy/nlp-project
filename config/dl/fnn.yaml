@@ -1,0 +1,19 @@
+# Feedforward Neural Network configuration
+model: fnn
+type: dl
+
+# parameters
+parameters:
+  n_layers: 3
+  hidden1: 32
+  hidden2: 64
+  hidden3: 96
+  hidden4: 128
+  dropout1: 0.21123623438964756
+  dropout2: 0.42950975144279024
+  dropout3: 0.2067063242213445
+  dropout4: 0.3002576666927477
+  l2_reg: 0.09763781936249412
+  lr: 0.0004720913857021753
+  batch_size: 32
+  epochs: 20
