@@ -7,11 +7,12 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-from model.svm import SVMModel
-from model.logistic import LogisticModel
-from model.xgboost import XGBoostModel
+from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
 from utils.common import set_seed
+from utils.config_loader import load_config
+import joblib
 
 
 def main():
@@ -48,9 +49,19 @@ def main():
     train_path = root / "data" / "processed" / "train.csv"
     vectorizer_path = root / "models" / "vectorizer.pkl"
 
+    # Load config
+    if args.config is None:
+        config_path = root / "config" / "ml" / f"{args.model}.yaml"
+    else:
+        config_path = Path(args.config)
+
+    config = load_config(str(config_path))
+    params = config.get("parameters", {})
+
     print("=" * 80)
     print(f"TRAINING {args.model.upper()} MODEL".center(80))
     print("=" * 80)
+    print(f"\nConfig: {config_path}")
 
     # Load processed data
     print("\n1. LOADING PROCESSED DATA...")
@@ -79,19 +90,47 @@ def main():
     X_train_vec = vec.transform(df_train["comment"])
     print(f"\tTrain shape: {X_train_vec.shape}")
 
-    # Initialize and train model
+    # Initialize and train model with specified parameters
     print(f"\n5. TRAINING {args.model.upper()} MODEL...")
 
     if args.model == "svm":
-        model = SVMModel(config_path=args.config)
+        model = SVC(
+            C=params.get("C", 1.0),
+            kernel=params.get("kernel", "rbf"),
+            gamma=params.get("gamma", "scale"),
+            random_state=42,
+            verbose=True,
+        )
     elif args.model == "logistic":
-        model = LogisticModel(config_path=args.config)
+        model = LogisticRegression(
+            C=params.get("C", 1.0),
+            max_iter=params.get("max_iter", 1000),
+            penalty=params.get("penalty", "l2"),
+            solver=params.get("solver", "lbfgs"),
+            random_state=42,
+            verbose=1,
+        )
     elif args.model == "xgboost":
-        model = XGBoostModel(config_path=args.config)
+        try:
+            from xgboost import XGBClassifier
+
+            model = XGBClassifier(
+                max_depth=params.get("max_depth", 6),
+                learning_rate=params.get("learning_rate", 0.3),
+                n_estimators=params.get("n_estimators", 100),
+                subsample=params.get("subsample", 1.0),
+                colsample_bytree=params.get("colsample_bytree", 1.0),
+                random_state=42,
+                verbosity=1,
+            )
+        except ImportError:
+            raise ImportError(
+                "XGBoost not installed. Install with: pip install xgboost"
+            )
     else:
         raise ValueError(f"Unsupported model: {args.model}")
 
-    model.fit(X_train_vec, y_train, verbose=True)
+    model.fit(X_train_vec, y_train)
 
     # Save model
     if args.save_path:
@@ -102,7 +141,8 @@ def main():
         save_path = str(model_dir / f"{args.model}.pkl")
 
     print(f"\n6. SAVING MODEL TO {save_path}...")
-    model.save(save_path)
+    joblib.dump(model, save_path)
+    print("\tModel saved successfully!")
 
     print("\n" + "=" * 80)
     print("TRAINING COMPLETED SUCCESSFULLY".center(80))

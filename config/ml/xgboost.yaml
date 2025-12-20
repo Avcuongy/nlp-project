@@ -4,4 +4,16 @@ type: ml
 
 # parameters
 parameters:
-  none
+  objective: "multi:softprob"
+  num_class: 3,
+  eval_metric: "mlogloss"
+  tree_method: "hist"
+  random_state: 42,
+  max_depth:
+  learning_rate:
+  n_estimators:
+  subsample:
+  colsample_bytree:
+  gamma:
+  reg_alpha:
+  reg_lambda:
