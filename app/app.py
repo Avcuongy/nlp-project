@@ -106,9 +106,30 @@ except Exception as e:
 # Cấu hình trang
 st.set_page_config(page_title="Sentiment Analysis", layout="centered")
 
-# CSS để căn giữa tiêu đề
+# CSS để căn giữa tiêu đề và style cho buttons
 st.markdown(
     """
+    <style>
+    /* Style cho button được chọn */
+    div[data-testid="column"] button[kind="secondary"] {
+        transition: all 0.3s ease;
+    }
+    
+    div[data-testid="column"] button[kind="secondary"]:hover {
+        transform: scale(1.05);
+        font-weight: bold;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    /* Style cho tất cả các buttons khi hover */
+    button[kind="primary"]:hover,
+    button[kind="secondary"]:hover {
+        font-weight: bold !important;
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+    }
+    </style>
     <h1 style='text-align: center;'>Sentiment Analysis</h1>
 """,
     unsafe_allow_html=True,
@@ -131,19 +152,37 @@ if "selected_model" not in st.session_state:
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    if st.button("SVM", use_container_width=True):
+    if st.button(
+        "SVM",
+        use_container_width=True,
+        type="primary" if st.session_state.selected_model == "SVM" else "secondary",
+    ):
         st.session_state.selected_model = "SVM"
 
 with col2:
-    if st.button("Logistic", use_container_width=True):
+    if st.button(
+        "Logistic",
+        use_container_width=True,
+        type=(
+            "primary" if st.session_state.selected_model == "Logistic" else "secondary"
+        ),
+    ):
         st.session_state.selected_model = "Logistic"
 
 with col3:
-    if st.button("XGBoost", use_container_width=True):
+    if st.button(
+        "XGBoost",
+        use_container_width=True,
+        type="primary" if st.session_state.selected_model == "XGBoost" else "secondary",
+    ):
         st.session_state.selected_model = "XGBoost"
 
 with col4:
-    if st.button("FNN", use_container_width=True):
+    if st.button(
+        "FNN",
+        use_container_width=True,
+        type="primary" if st.session_state.selected_model == "FNN" else "secondary",
+    ):
         st.session_state.selected_model = "FNN"
 
 # Hiển thị chỉ số khi đã chọn model

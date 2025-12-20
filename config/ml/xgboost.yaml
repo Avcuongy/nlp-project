@@ -9,11 +9,11 @@ parameters:
   eval_metric: "mlogloss"
   tree_method: "hist"
   random_state: 42,
-  max_depth:
-  learning_rate:
-  n_estimators:
-  subsample:
-  colsample_bytree:
-  gamma:
-  reg_alpha:
-  reg_lambda:
+  max_depth: 5
+  learning_rate: 0.07590214057473325
+  n_estimators: 697
+  subsample: 0.7058329982069236
+  colsample_bytree: 0.9920929369117178
+  gamma: 0.0675097620876346
+  reg_alpha: 0.7681049077910618
+  reg_lambda: 0.02181451468909168

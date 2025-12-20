@@ -10,6 +10,7 @@ warnings.filterwarnings("ignore")
 from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import classification_report, accuracy_score
 from utils.common import set_seed
 from utils.config_loader import load_config
 import joblib
@@ -47,6 +48,7 @@ def main():
 
     # Read processed data
     train_path = root / "data" / "processed" / "train.csv"
+    val_path = root / "data" / "processed" / "val.csv"
     vectorizer_path = root / "models" / "vectorizer.pkl"
 
     # Load config
@@ -66,7 +68,9 @@ def main():
     # Load processed data
     print("\n1. LOADING PROCESSED DATA...")
     df_train = pd.read_csv(train_path, encoding="utf-8")
+    df_val = pd.read_csv(val_path, encoding="utf-8")
     print(f"\tTrain size: {len(df_train)}")
+    print(f"\tValidation size: {len(df_val)}")
 
     # Load label encoder
     print("\n2. LOADING LABEL ENCODER...")
@@ -78,6 +82,9 @@ def main():
     # Transform labels
     labels_str = df_train["label"].astype(str)
     y_train = le.transform(labels_str)
+    
+    val_labels_str = df_val["label"].astype(str)
+    y_val = le.transform(val_labels_str)
 
     # Load vectorizer
     print("\n3. LOADING VECTORIZER...")
@@ -88,7 +95,9 @@ def main():
     # Vectorize text
     print("\n4. VECTORIZING TEXT...")
     X_train_vec = vec.transform(df_train["comment"])
+    X_val_vec = vec.transform(df_val["comment"])
     print(f"\tTrain shape: {X_train_vec.shape}")
+    print(f"\tValidation shape: {X_val_vec.shape}")
 
     # Initialize and train model with specified parameters
     print(f"\n5. TRAINING {args.model.upper()} MODEL...")
@@ -132,6 +141,15 @@ def main():
 
     model.fit(X_train_vec, y_train)
 
+    # Evaluate on validation set
+    print(f"\n6. EVALUATING {args.model.upper()} MODEL...")
+    y_val_pred = model.predict(X_val_vec)
+    val_accuracy = accuracy_score(y_val, y_val_pred)
+    
+    print(f"\n\tValidation Accuracy: {val_accuracy:.4f}")
+    print("\n\tClassification Report:")
+    print(classification_report(y_val, y_val_pred, target_names=le.classes_, digits=4))
+
     # Save model
     if args.save_path:
         save_path = args.save_path
@@ -140,7 +158,7 @@ def main():
         model_dir.mkdir(parents=True, exist_ok=True)
         save_path = str(model_dir / f"{args.model}.pkl")
 
-    print(f"\n6. SAVING MODEL TO {save_path}...")
+    print(f"\n7. SAVING MODEL TO {save_path}...")
     joblib.dump(model, save_path)
     print("\tModel saved successfully!")
 
