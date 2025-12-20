@@ -45,7 +45,7 @@ def load_models():
     return models
 
 
-# Preprocessing function theo notebook 2_preprocessing.ipynb
+# Preprocessing function
 def preprocess_text(text):
     # Clean
     cleaned = vn_text_clean(text)
@@ -64,7 +64,7 @@ def preprocess_text(text):
     return result
 
 
-# Dự đoán với model thực tế
+# Predict function
 def predict_sentiment_real(text, model_name, models, vectorizer, label_encoder):
     # Preprocessing
     processed_text = preprocess_text(text)
@@ -72,14 +72,14 @@ def predict_sentiment_real(text, model_name, models, vectorizer, label_encoder):
     # Vectorize
     X = vectorizer.transform([processed_text])
 
-    # Lấy model
+    # Model
     model = models.get(model_name.lower())
     if model is None:
         return "Model không tìm thấy"
 
-    # Dự đoán
+    # Predict
     if model_name.lower() == "fnn":
-        # FNN model cần dense array
+        # FNN model need dense array
         X_dense = X.toarray()
         prediction = model.predict(X_dense, verbose=0)
         predicted_class = np.argmax(prediction, axis=1)[0]
@@ -103,10 +103,10 @@ except Exception as e:
     models_loaded = False
 
 
-# Cấu hình trang
+# Streamlit app
 st.set_page_config(page_title="Sentiment Analysis", layout="centered")
 
-# CSS để căn giữa tiêu đề và style cho buttons
+# CSS
 st.markdown(
     """
     <style>
@@ -135,20 +135,20 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Thông số
+# Model metrics
 model_metrics = {
-    "SVM": {"accuracy": 0.87, "precision": 0.85, "recall": 0.88, "f1_score": 0.86},
-    "Logistic": {"accuracy": 0.84, "precision": 0.82, "recall": 0.85, "f1_score": 0.83},
-    "XGBoost": {"accuracy": 0.89, "precision": 0.88, "recall": 0.90, "f1_score": 0.89},
-    "FNN": {"accuracy": 0.91, "precision": 0.90, "recall": 0.92, "f1_score": 0.91},
+    "SVM": {"accuracy": 0.66, "precision": 0.54, "recall": 0.51, "f1_score": 0.52},
+    "Logistic": {"accuracy": 0.68, "precision": 0.56, "recall": 0.52, "f1_score": 0.51},
+    "XGBoost": {"accuracy": 0.66, "precision": 0.53, "recall": 0.50, "f1_score": 0.50},
+    "FNN": {"accuracy": 0.66, "precision": 0.49, "recall": 0.50, "f1_score": 0.49},
 }
 
 
-# Khởi tạo session state
+# Initialize session state
 if "selected_model" not in st.session_state:
     st.session_state.selected_model = None
 
-# Tạo 4 nút chọn model
+# Create 4 model selection buttons
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
@@ -158,6 +158,7 @@ with col1:
         type="primary" if st.session_state.selected_model == "SVM" else "secondary",
     ):
         st.session_state.selected_model = "SVM"
+        st.rerun()
 
 with col2:
     if st.button(
@@ -168,6 +169,7 @@ with col2:
         ),
     ):
         st.session_state.selected_model = "Logistic"
+        st.rerun()
 
 with col3:
     if st.button(
@@ -176,6 +178,7 @@ with col3:
         type="primary" if st.session_state.selected_model == "XGBoost" else "secondary",
     ):
         st.session_state.selected_model = "XGBoost"
+        st.rerun()
 
 with col4:
     if st.button(
@@ -184,8 +187,9 @@ with col4:
         type="primary" if st.session_state.selected_model == "FNN" else "secondary",
     ):
         st.session_state.selected_model = "FNN"
+        st.rerun()
 
-# Hiển thị chỉ số khi đã chọn model
+# Show selected model metrics
 if st.session_state.selected_model:
     metrics = model_metrics[st.session_state.selected_model]
     st.markdown(
@@ -202,14 +206,14 @@ if st.session_state.selected_model:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# Ô nhập văn bản
+# Input text area
 text_input = st.text_area(
     "Nhập văn bản:",
     height=150,
-    placeholder="Ví dụ: Sản phẩm này thật tuyệt vời...",
+    placeholder="Ví dụ: Xe vinfast thật tuyệt vời...",
 )
 
-# Nút predict và hiển thị kết quả
+# Button predict
 if st.button("Predict", use_container_width=True):
     if not st.session_state.selected_model:
         st.warning("Vui lòng chọn model trước khi dự đoán")
